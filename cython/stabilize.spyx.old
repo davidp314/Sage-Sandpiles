@@ -1,0 +1,47 @@
+def cython_stabilize(config, reduced_laplacian, out_degrees):
+    r"""
+    INPUT: config - list of values of the sandpile configuration
+           reduced_laplacian - the reduced Laplacian
+	   out_degrees - list of out_degrees
+    OUTPUT: list of values for a new configuration
+
+    TODO: fix ordering of vertices
+    """
+    cdef:
+        long **cy_laplacian
+        long *cy_config
+        long *cy_out_degrees
+        int *unstable
+        bint is_unstable=True
+        int i
+        int j
+        int nverts
+    # initialization
+    nverts = reduced_laplacian.nrows()
+    try:
+        cy_laplacian = <long **>malloc(nverts*sizeof(long *))
+        for i in range(nverts):
+            cy_laplacian[i] = <long *>malloc(nverts*sizeof(long))
+        cy_config = <long *>malloc(nverts*sizeof(long))
+        cy_out_degrees = <long *>malloc(nverts*sizeof(long))
+        for i in range(nverts):
+            cy_config[i] = config[i]
+        for i in range(nverts):
+            for j in range(nverts):
+                cy_laplacian[i][j] = reduced_laplacian[i,j]
+        for i in range(nverts):
+            cy_out_degrees[i] = out_degrees[i]
+        while(is_unstable):
+            is_unstable = 1
+            for i in range(nverts):
+                if cy_config[i] >= cy_out_degrees[i]:
+                    is_unstable = 0
+                    for j in range(nverts):
+                        cy_config[j] -= cy_laplacian[i][j]       
+        L = [cy_config[i] for i in range(nverts)]
+    # clean up
+    finally:
+        free(cy_laplacian)
+        free(cy_config)
+        free(cy_out_degrees)
+    return L

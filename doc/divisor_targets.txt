@@ -1,0 +1,574 @@
+
+---
+
+.. _Dcomplex():
+
+**Dcomplex()**
+
+        Returns the simplicial complex determined by the supports of the
+        linearly equivalent effective divisors.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        simplicial complex
+
+        EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: p = Divisor(S, [0,1,2,0,0,1]).Dcomplex()
+	    sage: p.homology()
+	    {0: 0, 1: Z x Z, 2: 0, 3: 0}
+	    sage: p.f_vector()
+	    [1, 6, 15, 9, 1]
+	    sage: p.betti()
+	    {0: 0, 1: 2, 2: 0, 3: 0}
+        
+---
+
+.. ___add__(other):
+
+**__add__(other)**
+
+        Defines addition of divisors.
+
+        INPUT:
+
+        ``other`` - Divisor
+
+        OUTPUT:
+
+        sum of ``self`` and ``other``
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: E = Divisor(S, [3,2,1])
+            sage: D + E
+            {0: 4, 1: 4, 2: 4}
+        
+---
+
+.. ___le__(other):
+
+**__le__(other)**
+
+        Returns true if every component of ``self`` is at most that of
+        ``other.
+
+        INPUT:
+
+        ``other`` - Divisor
+
+        OUTPUT:
+
+        boolean
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: E = Divisor(S, [2,3,4])
+            sage: F = Divisor(S, [2,0,4])
+            sage: D <= D
+            True
+            sage: D <= E
+            True
+            sage: E <= D
+            False
+            sage: D <= F
+            False
+            sage: F <= D
+            False
+        
+---
+
+.. ___lt__(other):
+
+**__lt__(other)**
+
+        Returns true if every component of ``self`` is at most that
+        of ``other`` and the two divisors are not equal.
+
+        INPUT:
+
+        ``other`` - Divisor
+
+        OUTPUT:
+
+        boolean
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: E = Divisor(S, [2,3,4])
+            sage: D < D
+            False
+            sage: D < E
+            True
+            sage: E < D
+            False
+        
+---
+
+.. ___ne__([noargspec]):
+
+**__ne__( [noargspec] )**
+x.__ne__(y) <==> x!=y
+---
+
+.. ___neg__():
+
+**__neg__()**
+
+        The additive inverse of the divisor.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: -D
+            {0: -1, 1: -2, 2: -3}
+        
+---
+
+.. ___sub__(other):
+
+**__sub__(other)**
+
+        Defines subtraction of divisors.
+
+        INPUT:
+
+        ``other`` - Divisor
+
+        OUTPUT:
+
+        sum of ``self`` and ``other``
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: E = Divisor(S, [3,2,1])
+            sage: D - E
+            {0: -2, 1: 0, 2: 2}
+        
+---
+
+.. _add_random():
+
+**add_random()**
+
+        Add one grain of sand to a random nonsink vertex.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+
+            sage: S = sandlib('generic')
+            sage: S.zero_div().add_random()  #random
+            {0: 0, 1: 0, 2: 0, 3: 1, 4: 0, 5: 0}
+        
+---
+
+.. _betti():
+
+**betti()**
+
+        Returns the Betti numbers for the simplicial complex associated with
+        the divisor.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        dictionary of integers
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [2,0,1])
+            sage: D.betti()
+            {0: 0, 1: 1}
+        
+---
+
+.. _deg():
+
+**deg()**
+
+        Returns the degree of the divisor.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        integer
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: D.deg()
+            6
+        
+---
+
+.. _dualize():
+
+**dualize()**
+
+        Returns the difference between the maximal stable divisor and the
+        divisor.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: D.dualize()
+            {0: 0, 1: -1, 2: -2}
+            sage: S.max_stable_div() - D == D.dualize()
+            True
+        
+---
+
+.. _effective_div():
+
+**effective_div()**
+
+        Returns all linearly equivalent effective divisors.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        list (of divisors)
+
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: D = Divisor(S, [0,0,0,0,0,2])
+	    sage: D.effective_div()
+	    [{0: 1, 1: 0, 2: 0, 3: 1, 4: 0, 5: 0},
+	     {0: 0, 1: 0, 2: 1, 3: 1, 4: 0, 5: 0},
+	     {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 2}]
+	    sage: [d.values() for d in _]
+	    [[1, 0, 0, 1, 0, 0], [0, 0, 1, 1, 0, 0], [0, 0, 0, 0, 0, 2]]
+        
+---
+
+.. _fire_script(sigma):
+
+**fire_script(sigma)**
+
+        Fire the script ``sigma``, i.e., fire each vertex the indicated number
+        of times.
+
+        INPUT:
+
+        ``sigma`` - Divisor or (list or dict representing a Divisor)
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: D.unstable()
+            [1, 2]
+            sage: D.fire_script([0,1,1])
+            {0: 3, 1: 1, 2: 2}
+            sage: D.fire_script(Divisor(S,[2,0,0])) == D.fire_vertex(0).fire_vertex(0)
+            True
+        
+---
+
+.. _fire_unstable():
+
+**fire_unstable()**
+
+        Fire all unstable vertices.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: D.fire_unstable()
+            {0: 3, 1: 1, 2: 2}
+        
+---
+
+.. _fire_vertex(v):
+
+**fire_vertex(v)**
+
+        Fire the vertex ``v``.
+
+        INPUT:
+
+        ``v`` - vertex
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: D.fire_vertex(1)
+            {0: 2, 1: 0, 2: 4}
+        
+---
+
+.. _is_alive(cycle):
+
+**is_alive(cycle)**
+
+        Will the divisor stabilize under repeated firings of all unstable
+        vertices?  Optionally returns the resulting cycle.
+
+        INPUT:
+
+        ``cycle`` (optional) - boolean
+
+        OUTPUT:
+
+        boolean or optionally, a list of Divisors
+
+        EXAMPLES::
+
+        sage: S = complete_sandpile(4)
+        sage: D = Divisor(S, {0: 4, 1: 3, 2: 3, 3: 2})
+        sage: D.is_alive()
+        True
+        sage: D.is_alive(true)
+        [{0: 4, 1: 3, 2: 3, 3: 2}, {0: 3, 1: 2, 2: 2, 3: 5}, {0: 1, 1: 4, 2: 4, 3: 3}]
+        
+---
+
+.. _is_symmetric(orbits):
+
+**is_symmetric(orbits)**
+
+        This function checks if the values of the divisor are constant
+        over the vertices in each sublist of ``orbits``.
+
+        INPUT:
+
+         - ``orbits`` - list of lists of vertices
+
+        OUTPUT:
+
+	boolean
+
+	EXAMPLES::
+
+	    sage: S = sandlib('kite')
+	    sage: S.dict()
+	    {0: {},
+	     1: {0: 1, 2: 1, 3: 1},
+	     2: {1: 1, 3: 1, 4: 1},
+	     3: {1: 1, 2: 1, 4: 1},
+	     4: {2: 1, 3: 1}}
+	    sage: D = Divisor(S, [2,1, 2, 2, 3])
+	    sage: D.is_symmetric([[0,2,3]])
+	    True
+        
+---
+
+.. _linear_system():
+
+**linear_system()**
+
+	Returns the complete linear system of a divisor.
+
+        INPUT: None
+
+        OUTPUT:
+
+        dict - ``{num_homog: int, homog:list, num_inhomog:int, inhomog:list}``
+
+	EXAMPLES::
+
+            sage: S = sandlib('generic')
+            sage: D = Divisor(S, [0,0,0,0,0,2])
+            sage: D.linear_system()
+            {'homog': [[-1, -1, -1], [1, 1, 1]],
+             'inhomog': [[1, 0, 0], [0, -1, -1], [0, 0, 0]],
+             'num_homog': 2,
+             'num_inhomog': 3}
+
+        NOTES:
+
+	If `L` is the Laplacian, an arbitrary `v` such that `v * L>= -D`
+	has the form `v = w + t` where `w` is in ``inhomg`` and `t` is in the
+	integer span of ``homog`` in the output of ``linear_system(D)``.
+
+	WARNING:
+
+	This method requires 4ti2.  After local installation of 4ti2, set the
+	``path_to_zsolve`` at the beginning of ``sandpile.sage``.
+        
+---
+
+.. _r_of_D():
+
+**r_of_D()**
+
+        Returns ``r(D)`` and an effective divisor ``F`` such
+        that ``|D - F|`` is empty.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        tuple ((integer ``r(D)``, divisor ``F``))
+
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: D = Divisor(S, [0,0,0,0,0,4])
+	    sage: E = D.r_of_D()
+	    sage: E
+	    (1, {0: 0, 1: 1, 2: 0, 3: 1, 4: 0, 5: 0})
+	    sage: F = E[1]
+	    sage: (D - F).values()
+	    [0, -1, 0, -1, 0, 4]
+	    sage: (D - F).effective_div()
+	    []
+	    sage: Divisor(S, [0,0,0,0,0,-4]).r_of_D()
+	    (-1, {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: -4})
+        
+---
+
+.. _support():
+
+**support()**
+
+        List of keys of the nonzero values of the divisor.
+
+        INPUT:
+
+	None
+
+        OUTPUT:
+
+	list - support of the divisor
+
+
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: c = S.identity()
+	    sage: c.values()
+	    [2, 2, 1, 1, 0]
+	    sage: c.support()
+	    [1, 2, 3, 4]
+	    sage: S.vertices()
+	    [0, 1, 2, 3, 4, 5]
+        
+---
+
+.. _unstable():
+
+**unstable()**
+
+        List of the unstable vertices.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        list of vertices
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = Divisor(S, [1,2,3])
+            sage: D.unstable()
+            [1, 2]
+        
+---
+
+.. _update():
+
+**update()**
+x.__init__(...) initializes x; see x.__class__.__doc__ for signature
+---
+
+.. _values():
+
+**values()**
+
+        Return the values of the divisor as a list, sorted in the order of the
+        vertices.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        list of integers
+
+        boolean
+
+        EXAMPLES::
+
+            sage: S = Sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a')
+            sage: D = Divisor(S, {'a':0, 'b':1, 1:2})
+            sage: D
+            {1: 2, 'a': 0, 'b': 1}
+            sage: D.values()
+            [2, 0, 1]
+            sage: S.vertices()
+            [1, 'a', 'b']
+        

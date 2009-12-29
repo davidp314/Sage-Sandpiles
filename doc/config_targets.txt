@@ -1,0 +1,688 @@
+
+---
+
+.. ___add__(other):
+
+**__add__(other)**
+
+        Defines addition of configurations.
+
+        INPUT:
+
+        ``other`` - Config
+
+        OUTPUT:
+
+        sum of ``self`` and ``other``
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: d = Config(S, [3,2])
+            sage: c + d
+            {1: 4, 2: 4}
+        
+---
+
+.. ___and__(other):
+
+**__and__(other)**
+
+        Returns the stabilization of the sum.
+
+        INPUT:
+
+        ``other`` - Config
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+            sage: S = Sandpile(graphs.CycleGraph(4), 0)
+            sage: c + c  # ordinary addition
+            {1: 2, 2: 0, 3: 0}
+            sage: c & c  # add and stabilize
+            {1: 0, 2: 1, 3: 0}
+            sage: c*c  # add and find equivalent recurrent
+            {1: 1, 2: 1, 3: 1}
+            sage: ~(c + c) == c & c
+            True
+        
+---
+
+.. ___invert__():
+
+**__invert__()**
+
+        Returns the stabilized configuration.
+
+        INPUT:
+
+	None
+
+        OUTPUT:
+
+	``Config``
+
+	Returns the stabilized configuration.
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: c = S.max_stable() + S.identity()
+            sage: ~c
+            {1: 2, 2: 2, 3: 1, 4: 1, 5: 1}
+            sage: ~c == c.stabilize()
+            True
+        
+---
+
+.. ___le__(other):
+
+**__le__(other)**
+
+        Returns true if every component of ``self`` is at most that of
+        ``other.
+
+        INPUT:
+
+        ``other`` - Config
+
+        OUTPUT:
+
+        boolean
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: d = Config(S, [2,3])
+            sage: e = Config(S, [2,0])
+            sage: c <= c
+            True
+            sage: c <= d
+            True
+            sage: d <= c
+            False
+            sage: c <= e
+            False
+            sage: e <= c
+            False
+        
+---
+
+.. ___lt__(other):
+
+**__lt__(other)**
+
+        Returns true if every component of ``self`` is at most that
+        of ``other`` and the two configurations are not equal.
+
+        INPUT:
+
+        ``other`` - Config
+
+        OUTPUT:
+
+        boolean
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: d = Config(S, [2,3])
+            sage: c < c
+            False
+            sage: c < d
+            True
+            sage: d < c
+            False
+        
+---
+
+.. ___mul__(other):
+
+**__mul__(other)**
+
+        Returns the recurrent element equivalent to the sum.
+
+        INPUT:
+
+        ``other`` - Config
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+            sage: S = Sandpile(graphs.CycleGraph(4), 0)
+            sage: c + c  # ordinary addition
+            {1: 2, 2: 0, 3: 0}
+            sage: c & c  # add and stabilize
+            {1: 0, 2: 1, 3: 0}
+            sage: c*c  # add and find equivalent recurrent
+            {1: 1, 2: 1, 3: 1}
+            sage: (c*c).is_recurrent()
+            True
+            sage: c*(-c) == S.identity()
+            True
+        
+---
+
+.. ___neg__():
+
+**__neg__()**
+
+        The additive inverse of the configuration.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: -c
+            {1: -1, 2: -2}
+        
+---
+
+.. ___pow__(k):
+
+**__pow__(k)**
+
+        Returns the recurrent element equivalent to the sum of the
+        configuration with itself ``k`` times.  If ``k`` is negative, do the
+        same for the negation of the configuration.  If ``k`` is zero, return
+        the identity of the sandpile group.
+
+        INPUT:
+
+        ``k`` - Config
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(4), 0)
+            sage: c = Config(S, [1,0,0])
+            sage: c^3
+            {1: 1, 2: 1, 3: 0}
+            sage: (c + c + c) == c^3
+            False
+            sage: (c + c + c).equivalent_recurrent() == c^3
+            True
+            sage: c^(-1)
+            {1: 1, 2: 1, 3: 0}
+            sage: c^0 == S.identity()
+            True
+        
+---
+
+.. ___sub__(other):
+
+**__sub__(other)**
+
+        Defines subtraction of configurations.
+
+        INPUT:
+
+        ``other`` - Config
+
+        OUTPUT:
+
+        sum of ``self`` and ``other``
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: d = Config(S, [3,2])
+            sage: c - d
+            {1: -2, 2: 0}
+        
+---
+
+.. _add_random():
+
+**add_random()**
+
+        Add one grain of sand to a random nonsink vertex.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES:
+
+	We compute the 'sizes' of the avalanches caused by adding random grains
+	of sand to the maximal stable configuration on a grid graph.  The
+	function ``stabilize()`` returns the firing vector of the
+	stabilization, a dictionary whose values say how many times each vertex
+	fires in the stabilization.
+
+        ::
+
+            sage: S = grid(10,10)
+            sage: m = S.max_stable()
+            sage: a = []
+            sage: for i in range(1000):
+            m = m.add_random()
+            m, firing_vector = m.stabilize(true)
+            a.append(sum(firing_vector.values()))
+
+            sage: p = list_plot([[log(i+1),log(a.count(i))] for i in [0..max(a)] if a.count(i)])
+            sage: t = text("Distribution of avalanche sizes", (2,2), rgbcolor=(1,0,0))
+            sage: show(p+t)
+        
+---
+
+.. _deg():
+
+**deg()**
+
+        Returns the degree of the configuration.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        integer
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: c.deg()
+            3
+        
+---
+
+.. _dualize():
+
+**dualize()**
+
+        Returns the difference between the maximal stable configuration and the
+        configuration.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: S.max_stable()
+            {1: 1, 2: 1}
+            sage: c.dualize()
+            {1: 0, 2: -1}
+            sage: S.max_stable() - c == c.dualize()
+            True
+        
+---
+
+.. _equivalent_recurrent(with_firing_vector):
+
+**equivalent_recurrent(with_firing_vector)**
+
+	Returns the recurrent configuration equivalent to the given
+	configuration and optionally returns the corresponding firing vector.
+
+        INPUT:
+
+	``with_firing_vector`` (optional) -  boolean
+
+        OUTPUT:
+
+	``Config`` or ``[Config, firing_vector]``
+
+
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: c = Config(S, [0,0,0,0,0])
+	    sage: c.equivalent_recurrent() == S.identity()
+	    True
+            sage: x = c.equivalent_recurrent(true)
+	    sage: r = vector([x[0][v] for v in S.nonsink_vertices()])
+	    sage: f = vector([x[1][v] for v in S.nonsink_vertices()])
+            sage: cv = vector(c.values())
+	    sage: r == cv - f*S.reduced_laplacian()
+	    True
+
+	NOTES:
+
+	Let `L` be the reduced laplacian, `c` the initial configuration, `r` the
+	returned configuration, and `f` the firing vector.  Then `r = c - f *
+	L`.
+        
+---
+
+.. _equivalent_superstable(with_firing_vector):
+
+**equivalent_superstable(with_firing_vector)**
+
+	Returns the equivalent superstable configuration and optionally
+        returns the corresponding firing vector.
+
+        INPUT:
+
+	``with_firing_vector`` (optional) - boolean
+
+        OUTPUT:
+
+	``Config`` or ``[Config, firing_vector]``
+
+
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: m = S.max_stable()
+	    sage: m.equivalent_superstable().is_superstable()
+            True
+	    sage: x = m.equivalent_superstable(true)
+	    sage: s = vector(x[0].values())
+	    sage: f = vector(x[1].values())
+	    sage: mv = vector(m.values())
+	    sage: s == mv - f*S.reduced_laplacian()
+            True
+
+	NOTES:
+
+	Let `L` be the reduced laplacian, `c` the initial configuration, `s` the
+	returned configuration, and `f` the firing vector.  Then `s = c - f *
+	L`.
+        
+---
+
+.. _fire_script(sigma):
+
+**fire_script(sigma)**
+
+        Fire the script ``sigma``, i.e., fire each vertex the indicated number
+        of times.
+
+        INPUT:
+
+        ``sigma`` - Config or (list or dict representing a Config)
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(4), 0)
+            sage: c = Config(S, [1,2,3])
+            sage: c.unstable()
+            [2, 3]
+            sage: c.fire_script(Config(S,[0,1,1]))
+            {1: 2, 2: 1, 3: 2}
+            sage: c.fire_script(Config(S,[2,0,0])) == c.fire_vertex(1).fire_vertex(1)
+            True
+        
+---
+
+.. _fire_unstable():
+
+**fire_unstable()**
+
+        Fire all unstable vertices.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(4), 0)
+            sage: c = Config(S, [1,2,3])
+            sage: c.fire_unstable()
+            {1: 2, 2: 1, 3: 2}
+        
+---
+
+.. _fire_vertex(v):
+
+**fire_vertex(v)**
+
+        Fire the vertex ``v``.
+
+        INPUT:
+
+        ``v`` - vertex
+
+        OUTPUT:
+
+        Config
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: c = Config(S, [1,2])
+            sage: c.fire_vertex(2)
+            {1: 2, 2: 0}
+        
+---
+
+.. _is_recurrent():
+
+**is_recurrent()**
+x.__init__(...) initializes x; see x.__class__.__doc__ for signature
+---
+
+.. _is_stable():
+
+**is_stable()**
+
+        Returns True stable.
+
+	INPUT:
+
+	None
+
+	OUTPUT:
+
+	boolean
+
+	EXAMPLES::
+
+            sage: S = sandlib('generic')
+            sage: S.max_stable().is_stable()
+            True
+            sage: (S.max_stable() + S.max_stable()).is_stable()
+            False
+            sage: (S.max_stable() & S.max_stable()).is_stable()
+            True
+        
+---
+
+.. _is_superstable():
+
+**is_superstable()**
+x.__init__(...) initializes x; see x.__class__.__doc__ for signature
+---
+
+.. _is_symmetric(orbits):
+
+**is_symmetric(orbits)**
+
+        This function checks if the values of the configuration are constant
+        over the vertices in each sublist of ``orbits``.
+
+        INPUT:
+
+         ``orbits`` - list of lists of vertices
+
+        OUTPUT:
+
+	boolean
+
+	EXAMPLES::
+
+	    sage: S = sandlib('kite')
+	    sage: S.dict()
+	    {0: {},
+	     1: {0: 1, 2: 1, 3: 1},
+	     2: {1: 1, 3: 1, 4: 1},
+	     3: {1: 1, 2: 1, 4: 1},
+	     4: {2: 1, 3: 1}}
+	    sage: c = Config(S, [1, 2, 2, 3])
+	    sage: c.is_symmetric([[2,3]])
+	    True
+        
+---
+
+.. _order():
+
+**order()**
+
+        Returns the order of the recurrent element equivalent to ``config``.
+
+        INPUT:
+
+        ``config`` - configuration
+
+        OUTPUT:
+
+        integer
+
+        EXAMPLES::
+
+            sage: S = sandlib('generic')
+            sage: [r.order() for r in S.recurrents()]
+            [3, 3, 5, 15, 15, 15, 5, 15, 15, 5, 15, 5, 15, 1, 15]
+        
+---
+
+.. _stabilize(with_firing_vector):
+
+**stabilize(with_firing_vector)**
+
+        Returns the stabilized configuration and optionally returns the
+        corresponding firing vector.
+
+        INPUT:
+
+	``with_firing_vector`` (optional) -  boolean
+
+        OUTPUT:
+
+	``Config`` or ``[Config, firing_vector]``
+
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: c = S.max_stable() + S.identity()
+	    sage: c.stabilize(true)
+	    [{1: 2, 2: 2, 3: 1, 4: 1, 5: 1}, {1: 1, 2: 5, 3: 7, 4: 1, 5: 6}]
+            sage: S.max_stable() & S.identity()
+            {1: 2, 2: 2, 3: 1, 4: 1, 5: 1}
+            sage: S.max_stable() & S.identity() == c.stabilize()
+            True
+            sage: ~c
+            {1: 2, 2: 2, 3: 1, 4: 1, 5: 1}
+        
+---
+
+.. _support():
+
+**support()**
+
+        The input is a dictionary of integers.  The output is a list of keys
+        of nonzero values of the dictionary.
+
+        INPUT:
+
+	None
+
+        OUTPUT:
+
+	list - support of the config
+
+	EXAMPLES::
+
+	    sage: S = sandlib('generic')
+	    sage: c = S.identity()
+	    sage: c.values()
+	    [2, 2, 1, 1, 0]
+	    sage: c.support()
+	    [1, 2, 3, 4]
+	    sage: S.vertices()
+	    [0, 1, 2, 3, 4, 5]
+        
+---
+
+.. _unstable():
+
+**unstable()**
+
+        List of the unstable vertices.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        list of vertices
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(4), 0)
+            sage: c = Config(S, [1,2,3])
+            sage: c.unstable()
+            [2, 3]
+        
+---
+
+.. _values():
+
+**values()**
+
+        Return the values of the configuration as a list, sorted in the order
+        of the vertices.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        list of integers
+
+        boolean
+
+        EXAMPLES::
+
+            sage: S = Sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a')
+            sage: c = Config(S, {'b':1, 1:2})
+            sage: c
+            {1: 2, 'b': 1}
+            sage: c.values()
+            [2, 1]
+            sage: S.nonsink_vertices()
+            [1, 'b']
+        

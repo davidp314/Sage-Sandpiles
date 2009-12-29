@@ -1,0 +1,92 @@
+- :ref:`Dcomplex() <Dcomplex()>`
+
+        Returns the simplicial complex determined by the supports of the        linearly equivalent effective divisors.
+
+- :ref:`__add__(other) <__add__(other)>`
+
+        Defines addition of divisors.
+
+- :ref:`__le__(other) <__le__(other)>`
+
+        Returns true if every component of ``self`` is at most that of        ``other.
+
+- :ref:`__lt__(other) <__lt__(other)>`
+
+        Returns true if every component of ``self`` is at most that        of ``other`` and the two divisors are not equal.
+
+- :ref:`__ne__( [noargspec] ) <__ne__([noargspec])>`
+
+
+
+- :ref:`__neg__() <__neg__()>`
+
+        The additive inverse of the divisor.
+
+- :ref:`__sub__(other) <__sub__(other)>`
+
+        Defines subtraction of divisors.
+
+- :ref:`add_random() <add_random()>`
+
+        Add one grain of sand to a random nonsink vertex.
+
+- :ref:`betti() <betti()>`
+
+        Returns the Betti numbers for the simplicial complex associated with        the divisor.
+
+- :ref:`deg() <deg()>`
+
+        Returns the degree of the divisor.
+
+- :ref:`dualize() <dualize()>`
+
+        Returns the difference between the maximal stable divisor and the        divisor.
+
+- :ref:`effective_div() <effective_div()>`
+
+        Returns all linearly equivalent effective divisors.
+
+- :ref:`fire_script(sigma) <fire_script(sigma)>`
+
+        Fire the script ``sigma``, i.e., fire each vertex the indicated number        of times.
+
+- :ref:`fire_unstable() <fire_unstable()>`
+
+        Fire all unstable vertices.
+
+- :ref:`fire_vertex(v) <fire_vertex(v)>`
+
+        Fire the vertex ``v``.
+
+- :ref:`is_alive(cycle) <is_alive(cycle)>`
+
+        Will the divisor stabilize under repeated firings of all unstable        vertices?  Optionally returns the resulting cycle.
+
+- :ref:`is_symmetric(orbits) <is_symmetric(orbits)>`
+
+        This function checks if the values of the divisor are constant        over the vertices in each sublist of ``orbits``.
+
+- :ref:`linear_system() <linear_system()>`
+
+	Returns the complete linear system of a divisor.
+
+- :ref:`r_of_D() <r_of_D()>`
+
+        Returns ``r(D)`` and an effective divisor ``F`` such        that ``|D - F|`` is empty.
+
+- :ref:`support() <support()>`
+
+        List of keys of the nonzero values of the divisor.
+
+- :ref:`unstable() <unstable()>`
+
+        List of the unstable vertices.
+
+- :ref:`update() <update()>`
+
+
+
+- :ref:`values() <values()>`
+
+        Return the values of the divisor as a list, sorted in the order of the        vertices.
+

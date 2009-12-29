@@ -1,0 +1,77 @@
+def cython_stabilize(config, reduced_laplacian, out_degrees, verts):
+    r"""
+    Stabilize a configuration on a sandpile.
+    
+    INPUT: 
+    
+     - ``config`` - list of values of the sandpile configuration
+     - ``reduced_laplacian`` - matrix
+     - ``out_degrees`` - dictionary
+     - ``verts`` - sandpile      
+	   
+    OUTPUT: list of values for a new configuration
+
+    EXAMPLES::
+
+	sage: S = Sandpile(grid(10,10),'sink')
+	sage: c = S.add(S.max_stable(),S.identity());
+	sage: L = S.reduced_laplacian()
+	sage: d = S.out_degree()
+	sage: v = S.nonsink_vertices()
+	sage: cython_stabilize(c, L, d, v)
+	[{(1, 1): 3,
+	  (1, 2): 5,
+	  (1, 3): 5,
+	  (1, 4): 2,
+	  (1, 5): 5,
+	  (1, 6): 5,
+	...
+	  (10, 8): 1,
+	  (10, 9): 1,
+	  (10, 10): 1}]
+    """
+    cdef:
+        long **cy_laplacian
+        long *cy_config
+        long *cy_firing_vector
+        long *cy_out_degrees
+        int *unstable
+        bint is_unstable=True
+        int i
+        int j
+        int nverts
+    # initialization
+    nverts = reduced_laplacian.nrows()
+    try:
+        cy_laplacian = <long **>malloc(nverts*sizeof(long *))
+        for i in range(nverts):
+            cy_laplacian[i] = <long *>malloc(nverts*sizeof(long))
+        cy_config = <long *>malloc(nverts*sizeof(long))
+        cy_firing_vector = <long *>malloc(nverts*sizeof(long))
+        cy_out_degrees = <long *>malloc(nverts*sizeof(long))
+        for i in range(nverts):
+            cy_config[i] = config[verts[i]]
+            cy_firing_vector[i] = 0
+            cy_out_degrees[i] = out_degrees[verts[i]]
+        for i in range(nverts):
+            for j in range(nverts):
+                cy_laplacian[i][j] = reduced_laplacian[i,j]
+        while(is_unstable):
+            is_unstable = 0
+            for i in range(nverts):
+                if cy_config[i] >= cy_out_degrees[i]:
+                    cy_firing_vector[i] += 1
+                    is_unstable = 1
+                    for j in range(nverts):
+                        cy_config[j] -= cy_laplacian[i][j]     
+        config = {}
+        firing_vector = {}
+        for i in range(nverts):
+            config[verts[i]] = cy_config[i]
+            firing_vector[verts[i]] = cy_firing_vector[i]
+    # clean up
+    finally:
+        free(cy_laplacian)
+        free(cy_config)
+        free(cy_out_degrees)
+    return [config, firing_vector]

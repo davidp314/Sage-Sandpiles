@@ -1,0 +1,104 @@
+- :ref:`__add__(other) <__add__(other)>`
+
+        Defines addition of configurations.
+
+- :ref:`__and__(other) <__and__(other)>`
+
+        Returns the stabilization of the sum.
+
+- :ref:`__invert__() <__invert__()>`
+
+        Returns the stabilized configuration.
+
+- :ref:`__le__(other) <__le__(other)>`
+
+        Returns true if every component of ``self`` is at most that of        ``other.
+
+- :ref:`__lt__(other) <__lt__(other)>`
+
+        Returns true if every component of ``self`` is at most that        of ``other`` and the two configurations are not equal.
+
+- :ref:`__mul__(other) <__mul__(other)>`
+
+        Returns the recurrent element equivalent to the sum.
+
+- :ref:`__neg__() <__neg__()>`
+
+        The additive inverse of the configuration.
+
+- :ref:`__pow__(k) <__pow__(k)>`
+
+        Returns the recurrent element equivalent to the sum of the        configuration with itself ``k`` times.  If ``k`` is negative, do the        same for the negation of the configuration.  If ``k`` is zero, return        the identity of the sandpile group.
+
+- :ref:`__sub__(other) <__sub__(other)>`
+
+        Defines subtraction of configurations.
+
+- :ref:`add_random() <add_random()>`
+
+        Add one grain of sand to a random nonsink vertex.
+
+- :ref:`deg() <deg()>`
+
+        Returns the degree of the configuration.
+
+- :ref:`dualize() <dualize()>`
+
+        Returns the difference between the maximal stable configuration and the        configuration.
+
+- :ref:`equivalent_recurrent(with_firing_vector) <equivalent_recurrent(with_firing_vector)>`
+
+	Returns the recurrent configuration equivalent to the given	configuration and optionally returns the corresponding firing vector.
+
+- :ref:`equivalent_superstable(with_firing_vector) <equivalent_superstable(with_firing_vector)>`
+
+	Returns the equivalent superstable configuration and optionally        returns the corresponding firing vector.
+
+- :ref:`fire_script(sigma) <fire_script(sigma)>`
+
+        Fire the script ``sigma``, i.e., fire each vertex the indicated number        of times.
+
+- :ref:`fire_unstable() <fire_unstable()>`
+
+        Fire all unstable vertices.
+
+- :ref:`fire_vertex(v) <fire_vertex(v)>`
+
+        Fire the vertex ``v``.
+
+- :ref:`is_recurrent() <is_recurrent()>`
+
+
+
+- :ref:`is_stable() <is_stable()>`
+
+        Returns True stable.
+
+- :ref:`is_superstable() <is_superstable()>`
+
+
+
+- :ref:`is_symmetric(orbits) <is_symmetric(orbits)>`
+
+        This function checks if the values of the configuration are constant        over the vertices in each sublist of ``orbits``.
+
+- :ref:`order() <order()>`
+
+        Returns the order of the recurrent element equivalent to ``config``.
+
+- :ref:`stabilize(with_firing_vector) <stabilize(with_firing_vector)>`
+
+        Returns the stabilized configuration and optionally returns the        corresponding firing vector.
+
+- :ref:`support() <support()>`
+
+        The input is a dictionary of integers.  The output is a list of keys        of nonzero values of the dictionary.
+
+- :ref:`unstable() <unstable()>`
+
+        List of the unstable vertices.
+
+- :ref:`values() <values()>`
+
+        Return the values of the configuration as a list, sorted in the order        of the vertices.
+

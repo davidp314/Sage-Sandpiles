@@ -1,0 +1,32 @@
+def test_stabilize(config, reduced_laplacian):
+    r"""
+    INPUT: config - list of values of the sandpile configuration
+           reduced_laplacian - the reduced Laplacian
+	   out_degrees - list of out_degrees
+    OUTPUT: list of values for a new configuration
+
+    TODO: fix ordering of vertices
+    """
+    cdef long **cy_laplacian
+    cdef long *cy_config
+    cdef int i
+    cdef int j
+    cdef nverts
+    # initialization
+    nverts = reduced_laplacian.nrows()
+    try:
+        cy_laplacian = <long **>malloc(nverts*sizeof(long *))
+        for i in range(nverts):
+            cy_laplacian[i] = <long *>malloc(nverts*sizeof(long))
+        cy_config = <long *>malloc(nverts*sizeof(long))
+        for i in range(nverts):
+            cy_config[i] = config[i]
+        for i in range(nverts):
+            for j in range(nverts):
+                cy_laplacian[i][j] = reduced_laplacian[i,j]
+        L = [config[i] for i in range(nverts)]
+    # clean up
+    finally:
+        free(cy_laplacian)
+        free(cy_config)
+    return L

@@ -1,0 +1,168 @@
+- :ref:`all_k_config(k) <all_k_config(k)>`
+
+	The configuration with all values set to k.
+
+- :ref:`all_k_div(k) <all_k_div(k)>`
+
+	The divisor with all values set to k.
+
+- :ref:`betti(verbose) <betti(verbose)>`
+
+        Computes the Betti table for the homogeneous sandpile ideal.  If        ``verbose`` is ``True``, it prints the standard Betti table, otherwise,        it returns a less formated table.
+
+- :ref:`betti_complexes() <betti_complexes()>`
+
+	Returns a list of all the divisors with nonempty linear systems whose	corresponding simplicial complexes have nonzero homology in some	dimension. Each such divisors is returned with its corresponding	simplicial complex.
+
+- :ref:`burning_config() <burning_config()>`
+
+        A minimal burning configuration.
+
+- :ref:`burning_script() <burning_script()>`
+
+        A script for the minimal burning configuration.
+
+- :ref:`canonical_divisor() <canonical_divisor()>`
+
+        Returns the canonical divisor: the divisor ``deg(v)-2`` grains of sand        on each vertex.  Only for undirected graphs.
+
+- :ref:`dict() <dict()>`
+
+        Returns a dictionary of dictionaries representing a directed graph.
+
+- :ref:`elementary_divisors() <elementary_divisors()>`
+
+        The elementary divisors of the sandpile group (a finite        abelian group).
+
+- :ref:`groebner() <groebner()>`
+
+        Returns a Groebner basis for the homogeneous sandpile ideal with        respect to the standard sandpile ordering (see ``ring``).
+
+- :ref:`group_order() <group_order()>`
+
+	Returns the size of the sandpile group.
+
+- :ref:`h_vector() <h_vector()>`
+
+        Returns the first differences of the Hilbert function of the homogeneous        sandpile ideal.  It lists the number of superstable configurations in        each degree.
+
+- :ref:`hilbert_function() <hilbert_function()>`
+
+        Returns the Hilbert function of the homogeneous sandpile ideal.
+
+- :ref:`ideal() <ideal()>`
+
+        The saturated, homogeneous sandpile ideal.
+
+- :ref:`identity() <identity()>`
+
+        Returns the identity configuration.
+
+- :ref:`in_degree(v) <in_degree(v)>`
+
+
+
+- :ref:`is_undirected() <is_undirected()>`
+
+        Returns ``True`` if ``(u,v)`` is and edge if and only if ``(v,u)`` is an        edges, each edge with the same weight.
+
+- :ref:`laplacian() <laplacian()>`
+
+        Returns the Laplacian matrix of the graph.
+
+- :ref:`max_stable() <max_stable()>`
+
+        Returns the maximal stable configuration.
+
+- :ref:`max_stable_div() <max_stable_div()>`
+
+        Returns the maximal stable divisor.
+
+- :ref:`max_superstables() <max_superstables()>`
+
+
+
+- :ref:`min_recurrents() <min_recurrents()>`
+
+        Returns the minimal recurrent elements.  If the underlying graph is        undirected, these are the recurrent elements of least degree.
+
+- :ref:`nonsink_vertices() <nonsink_vertices()>`
+
+	The names of the nonsink vertices.
+
+- :ref:`nonspecial_divisors() <nonspecial_divisors()>`
+
+        Returns the nonspecial divisors: those divisors of degree ``g-1`` with        empty linear system.  The term is only defined for undirected graphs.        Here, ``g = |E| - |V| + 1`` is the genus of the graph.
+
+- :ref:`num_edges() <num_edges()>`
+
+        Returns the number of edges.                EXAMPLES::                    sage: G = graphs.PetersenGraph()            sage: G.size()            15        
+
+- :ref:`out_degree(v) <out_degree(v)>`
+
+        Return the out-degree of a vertex or a list of all out-degrees.
+
+- :ref:`points() <points()>`
+
+	Returns generators for the multiplicative group of zeros of the sandpile	ideal.
+
+- :ref:`postulation() <postulation()>`
+
+	Returns the postulation number of the sandpile ideal.  This is the	largest weight of a superstable configuration of the graph.
+
+- :ref:`recurrents(verbose) <recurrents(verbose)>`
+
+	Returns the list of recurrent configurations. If ``verbose``        is ``False``, the configurations are converted to lists of        integers.
+
+- :ref:`reduced_laplacian() <reduced_laplacian()>`
+
+	Returns the reduced Laplacian matrix of the graph.
+
+- :ref:`reorder_vertices() <reorder_vertices()>`
+
+        Create a copy of the sandpile but with the vertices ordered according        to their distance from the sink, from greatest to least.
+
+- :ref:`resolution(verbose) <resolution(verbose)>`
+
+	This function computes a minimal free resolution of the homogeneous	sandpile ideal.  If ``verbose`` is ``True``, then all of the mappings	are returned.  Otherwise, the resolution is summarized.
+
+- :ref:`ring() <ring()>`
+
+	The ring containing the homogeneous sandpile ideal.
+
+- :ref:`sink() <sink()>`
+
+        Returns the identifier for the sink vertex.
+
+- :ref:`solve() <solve()>`
+
+        Computes approximations of the complex affine zeros of the sandpile        ideal.
+
+- :ref:`superstables(verbose) <superstables(verbose)>`
+
+	Returns the list of superstable configurations as dictionaries if	``verbose`` is ``True``, otherwise as lists of integers.  The	superstables are also known as `G`-parking functions.
+
+- :ref:`symmetric_recurrents(orbits) <symmetric_recurrents(orbits)>`
+
+        Returns the list of symmetric recurrent configurations.
+
+- :ref:`unsaturated_ideal() <unsaturated_ideal()>`
+
+        The unsaturated, homogeneous sandpile ideal.
+
+- :ref:`version() <version()>`
+
+        Returns the version number of Sage Sandpiles.
+
+- :ref:`vertices(boundary_first) <vertices(boundary_first)>`
+
+        Return a list of the vertices.                INPUT:                        -  ``boundary_first`` - Return the boundary vertices           first.                        EXAMPLES::                    sage: P = graphs.PetersenGraph()            sage: P.vertices()            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]                Note that the output of the vertices() function is always sorted.        This is sub-optimal, speed-wise, but note the following        optimizations::                    sage: timeit V = P.vertices()                     # not tested            100000 loops, best of 3: 8.85 [micro]s per loop            sage: timeit V = list(P.vertex_iterator())        # not tested            100000 loops, best of 3: 5.74 [micro]s per loop            sage: timeit V = list(P._nxg.adj.iterkeys())      # not tested            100000 loops, best of 3: 3.45 [micro]s per loop                In other words, if you want a fast vertex iterator, call the        dictionary directly.        
+
+- :ref:`zero_config() <zero_config()>`
+
+	The all-zero configuration.
+
+- :ref:`zero_div() <zero_div()>`
+
+	The all-zero divisor.
+
