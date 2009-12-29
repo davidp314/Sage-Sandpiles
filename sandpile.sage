@@ -2102,15 +2102,16 @@ class Sandpile(GenericSandpile, Graph):
     """
     def __init__(self, g, sink):
         r"""
-        Create an undirected sandpile.
+        Create an undirected sandpile. Users should in general call the
+        ``sandpile`` function instead.
 
         INPUT: 
 	
-	 - ``g`` - Graph object
+	``g`` - Graph object
             
-	 - ``sink`` - A sink vertex.  Any outgoing edges from the designated
-	   sink are ignored for the purposes of stabilization.  It is assumed
-	   that every vertex has a directed path into the sink.
+        ``sink`` - A sink vertex.  Any outgoing edges from the designated sink
+        are ignored for the purposes of stabilization.  It is assumed that
+        every vertex has a directed path into the sink.
 
         OUTPUT:
 
@@ -2142,15 +2143,16 @@ class DiSandpile(DiGraph, GenericSandpile):
     """
     def __init__(self, g, sink):
         r"""
-        Create a directed sandpile.
+        Create a directed sandpile.  Users should in general call the
+        ``sandpile`` function instead.
 
         INPUT: 
 	
-	 - ``g`` - DiGraph object
+	``g`` - DiGraph object
             
-	 - ``sink`` - A sink vertex.  Any outgoing edges from the designated
-	   sink are ignored for the purposes of stabilization.  It is assumed
-	   that every vertex has a directed path into the sink.
+        ``sink`` - A sink vertex.  Any outgoing edges from the designated sink
+        are ignored for the purposes of stabilization.  It is assumed that
+        every vertex has a directed path into the sink.
 
         OUTPUT:
 
@@ -2180,26 +2182,14 @@ def sandpile(g, sink):
 
     INPUT: 
 	
-	 - ``g`` - description of the multigraph. Must be one of the
-       following:
-        
-            #. dictionary whose keys are vertex names and whose values are
-            dictionaries with keys the names of vertices which are the heads
-            of outgoing edges and with values the weights of the edges
+    ``g`` - description of the multigraph recognized by DiGraph constructor
 
-            #. dictionary whose keys are vertex names and whose values are
-            lists of vertices which are the heads of outgoing edges
-
-            #. DiGraph object
-
-            #. Graph object
-
-         - ``sink`` - A sink vertex.  It is assumed that every vertex has a
-           directed path into the sink.
+    ``sink`` - A sink vertex.  It is assumed that every vertex has a directed
+    path into the sink.
 
     OUTPUT:
 
-	Sandpile or DiSandpile
+    Sandpile or DiSandpile
     """
     if isinstance(g, DiGraph):
         return DiSandpile(g, sink)
