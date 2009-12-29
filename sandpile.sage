@@ -228,7 +228,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
         NOTES:
 
-        Subclasses should initialize the concrete sage graph object parent
+        Subclasses should initialize the concrete sage graph class parent
         before calling this.
         """
         self._sink = sink  # key for sink
@@ -2136,7 +2136,7 @@ class Sandpile(GenericSandpile, Graph):
 ######### Directed Sandpiles ##########
 #######################################
 
-class DiSandpile(GenericSandpile, DiGraph):
+class DiSandpile(DiGraph, GenericSandpile):
     """
     Class for Dhar's abelian sandpile model on digraphs.
     """
@@ -2156,25 +2156,25 @@ class DiSandpile(GenericSandpile, DiGraph):
 
 	DiSandpile
         """
-        DiGraph.__init__(self, g, weighted=True)
-        GenericSandpile.__init__(self, sink)
         dict_ = {}
-        for v in self.vertices():
+        for v in g.vertices():
             edges = {}
-            for n in self.successors(v):
-                if (type(self.edge_label(v,n)) == type(1)
-                    and self.edge_label(v,n)>=0):
+            for n in g.successors(v):
+                if (type(g.edge_label(v,n)) == type(1)
+                    and g.edge_label(v,n)>=0):
                     edges[n] = g.edge_label(v,n)
                 else:
                     edges[n] = 1
             dict_[v] = edges
         self._dict = dict_
+        DiGraph.__init__(self, dict_, weighted=True)
+        GenericSandpile.__init__(self, sink)
  
 #######################################
-########### Config Class ##############
+###### sandpile creation function #####
 #######################################
 
-def sandpile(g, sink)
+def sandpile(g, sink):
     r"""
     Create a Sandpile or a DiSandpile.
 
@@ -2201,7 +2201,17 @@ def sandpile(g, sink)
 
 	Sandpile or DiSandpile
     """
-    pass
+    if isinstance(g, DiGraph):
+        return DiSandpile(g, sink)
+    elif isinstance(g, Graph):
+        return Sandpile(g, sink)
+    else:
+        G = Graph(g)
+        D = DiGraph(g)
+        if D == G.to_directed():
+            return Sandpile(G, sink)
+        else:
+            return DiSandpile(D, sink)
 
 
 #######################################
