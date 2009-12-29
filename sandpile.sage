@@ -42,7 +42,7 @@ A weighted directed graph given as a Python dictionary:
 
 The associated sandpile with 0 chosen as the sink::
 
-    sage: S = Sandpile(g,0)
+    sage: S = sandpile(g,0)
 
 A picture of the graph::
    
@@ -212,7 +212,7 @@ Distribution of avalanche sizes::
 class GenericSandpile(sage.graphs.graph.GenericGraph):
     """
     Class for Dhar's abelian sandpile model. Users should not interact directly
-    with this class, but call ``sandpile`` instead. Subclasses should also
+    with this class, but call ``sandpile`` instead. Subclasses must first
     inherit from a concrete sage graph object such as Graph or DiGraph.
     """
 
@@ -224,7 +224,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
         OUTPUT:
 
-        Sandpile
+        GenericSandpile
 
         NOTES:
 
@@ -656,7 +656,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
 	    sage: g = {0:{},1:{0:1,3:1,4:1},2:{0:1,3:1,5:1}, \
 		       3:{2:1,5:1},4:{1:1,3:1},5:{2:1,3:1}}
-	    sage: S = Sandpile(g,0)
+	    sage: S = sandpile(g,0)
             sage: S._set_burning_config()
         """
 	# TODO: Cythonize!
@@ -701,7 +701,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
 	    sage: g = {0:{},1:{0:1,3:1,4:1},2:{0:1,3:1,5:1}, \
 		       3:{2:1,5:1},4:{1:1,3:1},5:{2:1,3:1}}
-	    sage: S = Sandpile(g,0)
+	    sage: S = sandpile(g,0)
 	    sage: S.burning_config()
 	    {1: 2, 2: 0, 3: 1, 4: 1, 5: 0}
 	    sage: S.burning_config().values()
@@ -757,7 +757,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
 	    sage: g = {0:{},1:{0:1,3:1,4:1},2:{0:1,3:1,5:1},
 		       3:{2:1,5:1},4:{1:1,3:1},5:{2:1,3:1}}
-	    sage: S = Sandpile(g,0)
+	    sage: S = sandpile(g,0)
 	    sage: S.burning_config()
 	    {1: 2, 2: 0, 3: 1, 4: 1, 5: 0}
 	    sage: S.burning_config().values()
@@ -1419,7 +1419,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         
 	OUTPUT: 
 	
-	Sandpile
+	sandpile
 
 	EXAMPLES::
             sage: S.dict()
@@ -1453,7 +1453,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
             for j in old[i]:
                 entry[perm[j]]=old[i][j]
             new[perm[i]] = entry
-        return Sandpile(new,len(verts)-1)
+        return sandpile(new,len(verts)-1)
 
 
 #################### Functions for divisors #####################
@@ -1513,7 +1513,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
         EXAMPLES::
 
-	    sage: S = Sandpile({0:{},1:{0: 1, 2: 1, 3: 4},2:{3: 5},3:{1: 1, 2: 1}},0) 
+	    sage: S = sandpile({0:{},1:{0: 1, 2: 1, 3: 4},2:{3: 5},3:{1: 1, 2: 1}},0) 
             sage: S._set_betti_complexes()
         """
         results = []
@@ -1553,7 +1553,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
         EXAMPLES::
 
-	    sage: S = Sandpile({0:{},1:{0: 1, 2: 1, 3: 4},2:{3: 5},3:{1: 1, 2: 1}},0) 
+	    sage: S = sandpile({0:{},1:{0: 1, 2: 1, 3: 4},2:{3: 5},3:{1: 1, 2: 1}},0) 
 	    sage: p = S.betti_complexes()
 	    sage: p[0]
 	    [{0: -8, 1: 5, 2: 4, 3: 1},
@@ -1945,7 +1945,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
 	EXAMPLES::
 
-	    sage: S = Sandpile({0: {}, 1: {2: 2}, 2: {0: 4, 1: 1}}, 0)
+	    sage: S = sandpile({0: {}, 1: {2: 2}, 2: {0: 4, 1: 1}}, 0)
 	    sage: S.solve()
 	    [[0.707107*I - 0.707107, 0.707107 - 0.707107*I],
 	     [-0.707107*I - 0.707107, 0.707107*I + 0.707107],
@@ -2227,11 +2227,11 @@ class Config(dict):
     
     def __init__(self, S, c):
         r"""
-        Create a configuration on a Sandpile.
+        Create a configuration on a sandpile.
 
         INPUT: 
         
-        - ``S`` - Sandpile
+        - ``S`` - sandpile
         - ``c`` - dict or list representing a configuration
 
         OUTPUT: 
@@ -2653,7 +2653,7 @@ class Config(dict):
 
         EXAMPLES::
 
-            sage: S = Sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a') 
+            sage: S = sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a') 
             sage: c = Config(S, {'b':1, 1:2})
             sage: c
             {1: 2, 'b': 1}
@@ -3273,11 +3273,11 @@ class Divisor(dict):
     
     def __init__(self, S, D):
         r"""
-        Create a divisor on a Sandpile.
+        Create a divisor on a sandpile.
 
         INPUT: 
         
-        - ``S`` - Sandpile
+        - ``S`` - sandpile
         - ``D`` - dict or list representing a divisor
 
         OUTPUT: 
@@ -3609,7 +3609,7 @@ class Divisor(dict):
 
         EXAMPLES::
 
-            sage: S = Sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a') 
+            sage: S = sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a') 
             sage: D = Divisor(S, {'a':0, 'b':1, 1:2})
             sage: D
             {1: 2, 'a': 0, 'b': 1}
@@ -4342,7 +4342,7 @@ def sandlib(selector=None):
     elif selector not in sandpiles.keys():
         print selector, 'is not in the sandlib.'
     else:
-        return Sandpile(sandpiles[selector]['graph'], 0)
+        return sandpile(sandpiles[selector]['graph'], 0)
 
 #################################################
 ########## Some useful functions ################
@@ -4376,7 +4376,7 @@ def grid(m, n):
     ``m``, ``n`` - positive integers
 
     OUTPUT:
-    Sandpile with sink named ``sink``.
+    sandpile with sink named ``sink``.
 
     EXAMPLES::
 
@@ -4424,7 +4424,7 @@ def grid(m, n):
             g[(row,col)] ={(row-1,col):1, (row+1,col):1, (row,col-1):1, (row,col+1):1}
     # the sink vertex
     g['sink'] = {}
-    return Sandpile(g, 'sink')
+    return sandpile(g, 'sink')
 
 def triangle(n):
     r"""
@@ -4437,7 +4437,7 @@ def triangle(n):
 
     OUTPUT:
 
-    Sandpile
+    sandpile
 
     EXAMPLES::
 
@@ -4461,7 +4461,7 @@ def triangle(n):
             d = len(T[(i,j)])
             if d<6:
                 T[(i,j)]['sink'] = 6-d
-    T = Sandpile(T,'sink')
+    T = sandpile(T,'sink')
     pos = {}
     for x in T.nonsink_vertices():
         coords = list(x)
@@ -4509,7 +4509,7 @@ def aztec(n):
 	 (1/2, 3/2): {'sink': 2, (-1/2, 3/2): 1, (1/2, 1/2): 1},
 	 (3/2, -1/2): {'sink': 2, (1/2, -1/2): 1, (3/2, 1/2): 1},
 	 (3/2, 1/2): {'sink': 2, (1/2, 1/2): 1, (3/2, -1/2): 1}}
-	sage: Sandpile(aztec(2),'sink').group_order()
+	sage: sandpile(aztec(2),'sink').group_order()
         4542720
 
     NOTES:
@@ -4568,7 +4568,7 @@ def random_graph(num_verts, p=1/2, directed=True, weight_max=1):
     EXAMPLES::
 
 	sage: g = random_graph(6,0.2,True,3)
-	sage: S = Sandpile(g,0)
+	sage: S = sandpile(g,0)
 	sage: S.show(edge_labels = True)
     """
 
@@ -4690,7 +4690,7 @@ def glue_graphs(g, h, glue_g, glue_h):
 	 'y1': {0: 2},
 	 'y2': {'y1': 2},
 	 'y3': {0: 1, 'y2': 1}}
-	sage: S = Sandpile(z,0)                                             
+	sage: S = sandpile(z,0)                                             
 	sage: S.h_vector()
 	[1, 6, 17, 31, 41, 41, 31, 17, 6, 1]
 	sage: S.resolution()
@@ -4824,7 +4824,7 @@ def admissible_partitions(S, k):
 
     INPUT:
     
-    ``S`` - Sandpile
+    ``S`` - (undirected) Sandpile
     ``k`` - integer
 
     OUTPUT: 
@@ -4875,7 +4875,7 @@ def partition_sandpile(S, p):
 
     INPUT: 
     
-    ``S`` - Sandpile
+    ``S`` - (undirected) Sandpile
     ``p`` - partition of the vertices of ``S``
 
     OUTPUT: 
@@ -4918,7 +4918,7 @@ def firing_vector(S, D, E):
 
     INPUT: 
     
-    - ``S`` -Sandpile
+    ``S`` - sandpile
     ``D``, ``E`` - tuples (representing linearly equivalent divisors)
 
     OUTPUT:
