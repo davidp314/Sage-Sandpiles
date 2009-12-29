@@ -209,99 +209,28 @@ Distribution of avalanche sizes::
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
 
-class Sandpile(DiGraph):
+class GenericSandpile(sage.graphs.graph.GenericGraph):
     """
-    Class for Dhar's abelian sandpile model.
+    Class for Dhar's abelian sandpile model. Users should not interact directly
+    with this class, but call ``sandpile`` instead. Subclasses should also
+    inherit from a concrete sage graph object such as Graph or DiGraph.
     """
 
-    def __init__(self, g, sink):
+    def __init__(self, sink):
         r"""
         Create a sandpile.
 
-        INPUT: 
-	
-	 - ``g`` - dict for directed multgraph (see NOTES) edges weighted by
-	   nonnegative integers
-
-	 - ``sink`` - A sink vertex.  Any outgoing edges from the designated
-	   sink are ignored for the purposes of stabilization.  It is assumed
-	   that every vertex has a directed path into the sink.
+        INPUT:
 
         OUTPUT:
 
-	Sandpile
+        Sandpile
 
-	EXAMPLES:
+        NOTES:
 
-        Here ``g`` represents a square with directed, multiple edges with three
-        vertices, ``a``, ``b``, ``c``, and ``d``.  The vertex ``a`` has
-        outgoing edges to itself (weight 2), to vertex ``b`` (weight 1), and
-        vertex ``c`` (weight 3), for example.
-
-        ::
-
-            sage: g = {'a': {'a':2, 'b':1, 'c':3}, 'b': {'a':1, 'd':1},
-                       'c': {'a':1,'d': 1}, 'd': {'b':1, 'c':1}}
-            sage: G = Sandpile(g,'d')
-
-	Here is a square with unweighted edges.  In this example, the graph is
-	also undirected.
-
-	::
-
-            sage: g = {0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2]}
-            sage: G = Sandpile(g,3)
-       
-        NOTES::
-
-	Loops are allowed.  There are two admissible formats, both of which are
-	dictionaries whose keys are the vertex names.  In one format, the
-	values are dictionaries with keys the names of vertices which are the
-	tails of outgoing edges and with values the weights of the edges.  In
-	the other format, the values are lists of names of vertices which are
-	the tails of the outgoing edges.  All weights are then automatically
-	assigned the value 1.
+        Subclasses should initialize the concrete sage graph object parent
+        before calling this.
         """
-        # preprocess a graph, if necessary
-        if type(g) == dict and type(g.values()[0]) == dict:
-            pass # this is the default format
-        elif type(g) == dict and type(g.values()[0]) == list:
-            processed_g = {}
-            for k in g.keys():
-                temp = {}
-                for vertex in g[k]:
-                    temp[vertex] = 1
-                processed_g[k] = temp
-            g = processed_g
-        elif type(g) == sage.graphs.graph.Graph:
-            processed_g = {}
-            for v in g.vertices():
-                edges = {}
-                for n in g.neighbors(v):
-                    if type(g.edge_label(v,n)) == type(1) and g.edge_label(v,n) >=0:
-                        edges[n] = g.edge_label(v,n)
-                    else:
-                        edges[n] = 1
-                processed_g[v] = edges
-            g = processed_g
-        elif type(g) == sage.graphs.graph.DiGraph:
-            processed_g = {}
-            for v in g.vertices():
-                edges = {}
-                for n in g.successors(v):
-                    if (type(g.edge_label(v,n)) == type(1)
-                        and g.edge_label(v,n)>=0):
-                        edges[n] = g.edge_label(v,n)
-                    else:
-                        edges[n] = 1
-                processed_g[v] = edges
-            g = processed_g
-        else:
-            raise SyntaxError, g
-
-        # create digraph and initialize some variables
-        DiGraph.__init__(self,g,weighted=True)
-        self._dict = deepcopy(g)
         self._sink = sink  # key for sink
         self._sink_ind = self.vertices().index(sink)
         self._nonsink_vertices = deepcopy(self.vertices())
@@ -2162,6 +2091,118 @@ class Sandpile(DiGraph):
                 if (cnext not in active) and (cnext not in sym_recurrents):
                     active.append(cnext)
         return deepcopy(sym_recurrents)
+
+#######################################
+######## Undirected Sandpiles #########
+#######################################
+
+class Sandpile(GenericSandpile, Graph):
+    """
+    Class for Dhar's abelian sandpile model on undirected graphs.
+    """
+    def __init__(self, g, sink):
+        r"""
+        Create an undirected sandpile.
+
+        INPUT: 
+	
+	 - ``g`` - Graph object
+            
+	 - ``sink`` - A sink vertex.  Any outgoing edges from the designated
+	   sink are ignored for the purposes of stabilization.  It is assumed
+	   that every vertex has a directed path into the sink.
+
+        OUTPUT:
+
+	Sandpile
+
+        """
+        Graph.__init__(self, g, weighted=True)
+        GenericSandpile.__init__(self, sink)
+        dict_ = {}
+        for v in self.vertices():
+            edges = {}
+            for n in self.neighbors(v):
+                if (type(self.edge_label(v,n)) == type(1)
+                    and self.edge_label(v,n)>=0):
+                    edges[n] = g.edge_label(v,n)
+                else:
+                    edges[n] = 1
+            dict_[v] = edges
+        self._dict = dict_
+ 
+
+#######################################
+######### Directed Sandpiles ##########
+#######################################
+
+class DiSandpile(GenericSandpile, DiGraph):
+    """
+    Class for Dhar's abelian sandpile model on digraphs.
+    """
+    def __init__(self, g, sink):
+        r"""
+        Create a directed sandpile.
+
+        INPUT: 
+	
+	 - ``g`` - DiGraph object
+            
+	 - ``sink`` - A sink vertex.  Any outgoing edges from the designated
+	   sink are ignored for the purposes of stabilization.  It is assumed
+	   that every vertex has a directed path into the sink.
+
+        OUTPUT:
+
+	DiSandpile
+        """
+        DiGraph.__init__(self, g, weighted=True)
+        GenericSandpile.__init__(self, sink)
+        dict_ = {}
+        for v in self.vertices():
+            edges = {}
+            for n in self.successors(v):
+                if (type(self.edge_label(v,n)) == type(1)
+                    and self.edge_label(v,n)>=0):
+                    edges[n] = g.edge_label(v,n)
+                else:
+                    edges[n] = 1
+            dict_[v] = edges
+        self._dict = dict_
+ 
+#######################################
+########### Config Class ##############
+#######################################
+
+def sandpile(g, sink)
+    r"""
+    Create a Sandpile or a DiSandpile.
+
+    INPUT: 
+	
+	 - ``g`` - description of the multigraph. Must be one of the
+       following:
+        
+            #. dictionary whose keys are vertex names and whose values are
+            dictionaries with keys the names of vertices which are the heads
+            of outgoing edges and with values the weights of the edges
+
+            #. dictionary whose keys are vertex names and whose values are
+            lists of vertices which are the heads of outgoing edges
+
+            #. DiGraph object
+
+            #. Graph object
+
+         - ``sink`` - A sink vertex.  It is assumed that every vertex has a
+           directed path into the sink.
+
+    OUTPUT:
+
+	Sandpile or DiSandpile
+    """
+    pass
+
 
 #######################################
 ########### Config Class ##############
