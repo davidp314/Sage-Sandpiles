@@ -2117,19 +2117,19 @@ class Sandpile(GenericSandpile, Graph):
 	Sandpile
 
         """
-        Graph.__init__(self, g, weighted=True)
-        GenericSandpile.__init__(self, sink)
         dict_ = {}
-        for v in self.vertices():
+        for v in g.vertices():
             edges = {}
-            for n in self.neighbors(v):
-                if (type(self.edge_label(v,n)) == type(1)
-                    and self.edge_label(v,n)>=0):
+            for n in g.neighbors(v):
+                if (type(g.edge_label(v,n)) == type(1)
+                    and g.edge_label(v,n)>=0):
                     edges[n] = g.edge_label(v,n)
                 else:
                     edges[n] = 1
             dict_[v] = edges
         self._dict = dict_
+        Graph.__init__(self, dict_, weighted=True)
+        GenericSandpile.__init__(self, sink)
  
 
 #######################################
@@ -2206,7 +2206,10 @@ def sandpile(g, sink):
     elif isinstance(g, Graph):
         return Sandpile(g, sink)
     else:
-        G = Graph(g)
+        try:
+            G = Graph(g)
+        except ValueError:
+            G = Graph()
         D = DiGraph(g)
         if D == G.to_directed():
             return Sandpile(G, sink)
