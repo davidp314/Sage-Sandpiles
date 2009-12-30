@@ -2132,6 +2132,24 @@ class Sandpile(GenericSandpile, Graph):
         Graph.__init__(self, dict_, weighted=True)
         GenericSandpile.__init__(self, sink)
  
+    def _set_burning_config(self):
+        r"""
+        Calculate the minimal burning configuration and its corresponding
+        script.
+ 
+        EXAMPLES::
+ 
+        sage: K = complete_sandpile(5)
+        sage: K._set_burning_config()
+        """
+        # TODO: Cythonize!
+        d = self.num_verts() - 1
+        bs = [1]*d  # d 1s
+        bc = {}
+        for v in self.nonsink_vertices():
+            bc[v] = self.edge_label(v, self.sink())
+        self._burning_config = Config(self,bc)
+        self._burning_script = Config(self,bs)
 
 #######################################
 ######### Directed Sandpiles ##########
