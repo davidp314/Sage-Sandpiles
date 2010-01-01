@@ -2147,6 +2147,50 @@ class Sandpile(GenericSandpile, Graph):
         self._burning_config = self.config(bc)
         self._burning_script = self.config(bs)
 
+    def config(self, c):
+        r"""
+        Construct a Configuration on ``self``.
+
+        INPUT:
+
+        ``c`` - must be one of the following:
+
+            #. an instance of dict or a subclass such that
+            self.nonsink_vertices() is a subset of c.keys()
+
+            #. an iterable object of length self.num_verts()-1 whose values are
+            sorted to correspond with self.nonsink_vertices()
+
+        OUTPUT:
+
+        Configuration
+
+        EXAMPLES::
+        """
+        return Configuration(self, c)
+
+    def div(self, d):
+        r"""
+        Construct a Divisor on ``self``.
+
+        INPUT:
+
+        ``c`` - must be one of the following:
+
+            #. an instance of dict or a subclass such that self.vertices() is a
+            subset of c.keys()
+
+            #. an iterable object of length self.num_verts() whose values are
+            sorted to correspond with self.vertices()
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+        """
+        return Divisor(self, d)
+
 #######################################
 ######### Directed Sandpiles ##########
 #######################################
@@ -2185,6 +2229,51 @@ class DiSandpile(DiGraph, GenericSandpile):
         self._dict = dict_
         DiGraph.__init__(self, dict_, weighted=True)
         GenericSandpile.__init__(self, sink)
+
+    def config(self, c):
+        r"""
+        Construct a Configuration on ``self``.
+
+        INPUT:
+
+        ``c`` - must be one of the following:
+
+            #. an instance of dict or a subclass such that
+            self.nonsink_vertices() is a subset of c.keys()
+
+            #. an iterable object of length self.num_verts()-1 whose values are
+            sorted to correspond with self.nonsink_vertices()
+
+        OUTPUT:
+
+        Configuration
+
+        EXAMPLES::
+        """
+        return DirectedConfiguration(self, c)
+
+    def div(self, d):
+        r"""
+        Construct a Divisor on ``self``.
+
+        INPUT:
+
+        ``c`` - must be one of the following:
+
+            #. an instance of dict or a subclass such that self.vertices() is a
+            subset of c.keys()
+
+            #. an iterable object of length self.num_verts() whose values are
+            sorted to correspond with self.vertices()
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+        """
+        return DirectedDivisor(self, d)
+
  
 #######################################
 ###### sandpile creation function #####
@@ -2243,7 +2332,10 @@ class GenericConfiguration(dict):
         
         Configuration
 
-        EXAMPLES::
+        NOTES:
+
+        Users should use Sandpile.config() to construct configurations rather
+        than constructing the object directly
         """
         config = {}
         if isinstance(c, dict):
@@ -3260,7 +3352,7 @@ class Configuration(GenericConfiguration):
     """
     pass
 
-class DiConfiguration(GenericConfiguration):
+class DirectedConfiguration(GenericConfiguration):
     r"""
     Configuration on a DiSandpile
     """
@@ -3294,15 +3386,15 @@ class GenericDivisor(dict):
         """
         div = {}
         if isinstance(d, dict):
-            if set(S.vertics()).is_subset(d.keys()):
-                for v in S.nonsink_vertices():
+            if set(S.vertices()).is_subset(d.keys()):
+                for v in S.vertices():
                     div[v] = d[v]
             else:
                 raise SyntaxError, d
-        elif len(d)==S.num_verts()-1:
+        elif len(d)==S.num_verts():
             d = list(reversed(d))
             for v in S.vertices():
-                d[v] = d.pop()
+                div[v] = d.pop()
         else:
             raise SyntaxError, d
         dict.__init__(self,div)
@@ -3687,7 +3779,7 @@ class GenericDivisor(dict):
         """
         #FIXME use Script objects
         D = dict(self)
-        if not isinstance(sigma, Script)
+        if not isinstance(sigma, Script):
             sigma = self._sandpile.script(sigma)
         sigma = sigma.values()
         for i in range(len(sigma)):
@@ -4250,6 +4342,97 @@ class GenericDivisor(dict):
             return self._life
         else:
             return self._life != []
+
+
+class Divisor(GenericDivisor):
+    r"""
+    Divisor on an undirected Sandpile
+    """
+    pass
+
+class DirectedDivisor(GenericDivisor):
+    r"""
+    Divisor on a DiSandpile
+    """
+    pass
+
+#######################################
+############## Script #################
+#######################################
+class GenericScript(dict):
+    r"""
+    Firing script object on a graph
+    """
+    def __init__(self, S, d):
+        r"""
+        Create a firing script on a sandpile.
+
+        INPUT: 
+        
+        - ``S`` - sandpile
+        - ``d`` - dict or list representing a script
+
+        OUTPUT: 
+        
+        Script
+
+        NOTES:
+
+        Users should use the Sandpile.script() method to construct scripts
+        rather than calling this constructor directly.
+        """
+        script = {}
+        if isinstance(d, dict):
+            if set(S.vertices()).is_subset(d.keys()):
+                for v in S.vertices():
+                    script[v] = d[v]
+            elif set(S.nonsink_vertices()).is_subset(d.keys()):
+                for v in S.nonsink_vertices():
+                    script[v] = d[v]
+                script[S.sink()]=0
+            else:
+                raise SyntaxError, d
+        elif len(d)==S.num_verts():
+            d = list(reversed(d))
+            for v in S.vertices():
+                script[v] = d.pop()
+        elif len(d)==S.num_verts()-1:
+            d = list(reversed(d))
+            for v in S.nonsink_vertices():
+                script[v] = d.pop()
+            script[S.sink()]=0
+        else:
+            raise SyntaxError, d
+        dict.__init__(self,script)
+        self._sandpile = S
+        self._vertices = S.vertices()
+
+    def __deepcopy__(self, memo):
+        r"""
+        Overrides the deepcopy method for dict.
+
+        INPUT:
+        
+        None
+
+        OUTPUT:
+
+        None
+
+        EXAMPLES::
+
+            sage: S = sandlib('generic')
+            sage: D = S.div([1,2,3,4,5,6])
+            sage: E = deepcopy(D)
+            sage: E[0] += 10
+            sage: D
+            {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6}
+            sage: E
+            {0: 11, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6}
+        """
+        s = self._sandpile.script(dict(self))
+        s.__dict__.update(self.__dict__)
+        return s
 
 #######################################
 ######### Some test graphs ############
