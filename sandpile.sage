@@ -2228,7 +2228,7 @@ def sandpile(g, sink):
 #######################################
 ########### Config Class ##############
 #######################################
-class Config(dict):
+class GenericConfiguration(dict):
     r"""
     Class for configurations on a sandpile.
     """
@@ -2239,8 +2239,9 @@ class Config(dict):
 
         INPUT: 
         
-        - ``S`` - sandpile
-        - ``c`` - dict or list representing a configuration
+        ``S`` - sandpile
+        ``c`` - dict whose keys are a superset of S.nonsink_vertices(), or an
+        ordered collection of values corresponding to S.nonsink_vertices()
 
         OUTPUT: 
         
@@ -2248,19 +2249,18 @@ class Config(dict):
 
         EXAMPLES::
         """
-        if len(c)==S.num_verts()-1:
-            if type(c)==dict or type(c)==Config:
-                dict.__init__(self,c)
-            elif type(c)==list:
-                c.reverse()
-                config = {}
-                for v in S.vertices():
-                    if v!=S.sink():
-                        config[v] = c.pop()
-                dict.__init__(self,config)
-        else:
-            raise SyntaxError, c
-
+        config = {}
+        if isinstance(c, dict):
+            if set(S.nonsink_vertices()).is_subset(c.keys()):
+                for v in S.nonsink_vertices():
+                    config[v] = c[v]
+            else:
+                raise SyntaxError, c
+        elif len(c)==S.num_verts()-1:
+            c = list(reversed(c))
+            for v in S.nonsink_vertices():
+                config[v] = c.pop()
+        dict.__init__(self,config)
         self._sandpile = S
         self._vertices = S.nonsink_vertices()
  
@@ -3270,23 +3270,35 @@ class Config(dict):
                 return false
         return True
 
+class Configuration(GenericConfiguration):
+    r"""
+    Configuration on an undirected Sandpile
+    """
+    pass
+
+class DiConfiguration(GenericConfiguration):
+    r"""
+    Configuration on a DiSandpile
+    """
+    pass
+
 #######################################
 ########### Divisor Class #############
 #######################################
 
-class Divisor(dict):
+class GenericDivisor(dict):
     r"""
     Class for divisors on a sandpile.
     """
     
-    def __init__(self, S, D):
+    def __init__(self, S, d):
         r"""
         Create a divisor on a sandpile.
 
         INPUT: 
         
         - ``S`` - sandpile
-        - ``D`` - dict or list representing a divisor
+        - ``d`` - dict or list representing a divisor
 
         OUTPUT: 
         
@@ -3296,17 +3308,20 @@ class Divisor(dict):
         
 
         """
-        if len(D)==S.num_verts():
-            if type(D) in [dict, Divisor, Config]:
-                dict.__init__(self,dict(D))
-            elif type(D)==list:
-                div = {}
-                for i in range(S.num_verts()):
-                    div[S.vertices()[i]] = D[i]
-                    dict.__init__(self,div)
+        div = {}
+        if isinstance(d, dict):
+            if set(S.vertics()).is_subset(d.keys()):
+                for v in S.nonsink_vertices():
+                    div[v] = d[v]
+            else:
+                raise SyntaxError, d
+        elif len(d)==S.num_verts()-1:
+            d = list(reversed(d))
+            for v in S.vertices():
+                d[v] = d.pop()
         else:
-            raise SyntaxError, D
-
+            raise SyntaxError, d
+        dict.__init__(self,div)
         self._sandpile = S
         self._vertices = S.vertices()
 
