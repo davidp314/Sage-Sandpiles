@@ -2088,6 +2088,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
                     active.append(cnext)
         return deepcopy(sym_recurrents)
 
+
 #######################################
 ######## Undirected Sandpiles #########
 #######################################
@@ -2191,6 +2192,31 @@ class Sandpile(GenericSandpile, Graph):
         """
         return Divisor(self, d)
 
+    def script(self, s):
+        r"""
+        Create a firing script on ``self``.
+
+        INPUT:
+
+        ``s`` - Must be one of the following
+
+            #. an instance of dict or a subclass such that
+            self.nonsink_vertices() is a subset of s.keys() (if self.sink() is
+            also in s.keys() it will be used)
+
+            #. an iterable object of length self.num_verts() (resp.
+            self.num_verts()-1) whose values are sorted to correspond with
+            self.vertices() (resp. self.nonsink_vertices())
+
+        OUTPUT:
+
+        Script
+
+        Examples::
+        """
+        return Script(self, s)
+
+
 #######################################
 ######### Directed Sandpiles ##########
 #######################################
@@ -2274,6 +2300,31 @@ class DiSandpile(DiGraph, GenericSandpile):
         """
         return DirectedDivisor(self, d)
 
+    def script(self, s):
+        r"""
+        Create a firing script on ``self``.
+
+        INPUT:
+
+        ``s`` - Must be one of the following
+
+            #. an instance of dict or a subclass such that
+            self.nonsink_vertices() is a subset of s.keys() (if self.sink() is
+            also in s.keys() it will be used)
+
+            #. an iterable object of length self.num_verts() (resp.
+            self.num_verts()-1) whose values are sorted to correspond with
+            self.vertices() (resp. self.nonsink_vertices())
+
+        OUTPUT:
+
+        Script
+
+        Examples::
+        """
+        return DirectedScript(self, s)
+
+
  
 #######################################
 ###### sandpile creation function #####
@@ -2352,6 +2403,24 @@ class GenericConfiguration(dict):
         self._sandpile = S
         self._vertices = S.nonsink_vertices()
  
+    def __iter__(self):
+        r"""
+        Overrides the default iterator for dicts so that instead it iterates
+        over the values in the order given by self._vertices
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        None
+
+        EXAMPLES::
+        """
+        for v in self._vertices:
+            yield self[v]
+
     def __deepcopy__(self, memo):
         r"""
         Overrides the deepcopy method for dict.
@@ -2826,18 +2895,7 @@ class GenericConfiguration(dict):
             sage: c.fire_script(S.script([2,0,0])) == c.fire_vertex(1).fire_vertex(1)
             True
         """
-        #FIXME use script objects
-        c = dict(self)
-        if type(sigma)!=Config:
-            sigma = Config(self._sandpile, sigma)
-        sigma = sigma.values()
-        for i in range(len(sigma)):
-            v = self._vertices[i]
-            c[v] -= sigma[i]*self._sandpile.out_degree(v)
-            for e in self._sandpile.outgoing_edges(v):
-                if e[1]!=self._sandpile.sink():
-                    c[e[1]]+=sigma[i]*e[2]
-        return Config(self._sandpile, c)
+        return self - sigma.config()
 	
     def unstable(self):
         r"""
@@ -3401,6 +3459,24 @@ class GenericDivisor(dict):
         self._sandpile = S
         self._vertices = S.vertices()
 
+    def __iter__(self):
+        r"""
+        Overrides the default iterator for dicts so that instead it iterates
+        over the values in the order given by self._vertices
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        None
+
+        EXAMPLES::
+        """
+        for v in self._vertices:
+            yield self[v]
+
     def __deepcopy__(self, memo):
         r"""
         Overrides the deepcopy method for dict.
@@ -3777,17 +3853,7 @@ class GenericDivisor(dict):
             sage: D.fire_script(S.script(2,0,0])) == D.fire_vertex(0).fire_vertex(0)
             True
         """
-        #FIXME use Script objects
-        D = dict(self)
-        if not isinstance(sigma, Script):
-            sigma = self._sandpile.script(sigma)
-        sigma = sigma.values()
-        for i in range(len(sigma)):
-            v = self._vertices[i]
-            D[v] -= sigma[i]*self._sandpile.out_degree(v)
-            for e in self._sandpile.outgoing_edges(v):
-                D[e[1]]+=sigma[i]*e[2]
-        return self._sandpile.div(D)
+        return self - sigma.div()
 
     def unstable(self):
         r"""
@@ -4407,6 +4473,24 @@ class GenericScript(dict):
         self._sandpile = S
         self._vertices = S.vertices()
 
+    def __iter__(self):
+        r"""
+        Overrides the default iterator for dicts so that instead it iterates
+        over the values in the order given by self._vertices
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        None
+
+        EXAMPLES::
+        """
+        for v in self._vertices:
+            yield self[v]
+
     def __deepcopy__(self, memo):
         r"""
         Overrides the deepcopy method for dict.
@@ -4433,6 +4517,251 @@ class GenericScript(dict):
         s = self._sandpile.script(dict(self))
         s.__dict__.update(self.__dict__)
         return s
+
+    def __setitem__(self, key, item):
+        r"""
+        Overrides the setitem method for dict.
+
+        INPUT:
+
+        - ``key``, ``item`` - objects
+
+        OUTPUT:
+
+        None
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = S.div([0,1,1])
+            sage: eff = D.effective_div()
+            sage: D.__dict__
+            {'_effective_div': [{0: 2, 1: 0, 2: 0}, {0: 0, 1: 1, 2: 1}],
+             '_linear_system': {'homog': [[-1, -1, -1], [1, 1, 1]],
+                                'inhomog': [[1, 0, 0], [0, -1, -1], [0, 0, 0]],
+                                'num_homog': 2,
+                                'num_inhomog': 3},
+             '_sandpile': Digraph on 3 vertices,
+             '_vertices': [0, 1, 2]}
+            sage: D[0] += 1
+            sage: D.__dict__
+            {'_sandpile': Digraph on 3 vertices, '_vertices': [0, 1, 2]}
+
+        NOTES:
+        
+        In the example, above, changing the value of ``D`` at some vertex makes
+        a call to setitem, which resets some of the stored variables for ``D``.
+        """
+        if key in self.keys():
+            dict.__setitem__(self,key,item)
+            S = self._sandpile
+            V = self._vertices
+            self.__dict__ = {'_sandpile':S, '_vertices': V}
+        else:
+            raise UserWarning, 'unimplemented'
+
+    pop = popitem = update = set_default = __delitem__ = None
+
+    def __getattr__(self, name):
+        """
+        Set certain variables only when called.
+        """
+        if not self.__dict__.has_key(name):
+            if name=='confi':
+                self._set_config()
+                return self.__dict__[name]
+            if name=='_div':
+                self._set_effective_div()
+                return self.__dict__[name]
+            if name=='_r_of_D':
+                self._set_r_of_D()
+                return self.__dict__[name]
+            if name=='_Dcomplex':
+                self._set_Dcomplex()
+                return self.__dict__[name]
+            if name=='_life':
+                self._set_life()
+                return self.__dict__[name]
+            else:
+                raise AttributeError, name
+
+    def __add__(self, other):
+        r"""
+        Defines addition of divisors.
+
+        INPUT:
+
+        ``other`` - Divisor
+
+        OUTPUT:
+
+        sum of ``self`` and ``other``
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = S.div([1,2,3])
+            sage: E = S.div([3,2,1])
+            sage: D + E
+            {0: 4, 1: 4, 2: 4}
+        """
+        sum = deepcopy(self)
+        for v in self:
+            sum[v] += other[v]
+        return sum
+
+    def __radd__(self,other):
+        for v in self:
+            self[v] += other[v]
+
+    def __sub__(self, other):
+        r"""
+        Defines subtraction of divisors.
+
+        INPUT:
+
+        ``other`` - Divisor
+
+        OUTPUT:
+
+        sum of ``self`` and ``other``
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = S.div([1,2,3])
+            sage: E = S.div([3,2,1])
+            sage: D - E
+            {0: -2, 1: 0, 2: 2}
+        """
+        sum = deepcopy(self)
+        for v in self:
+            sum[v] -= other[v]
+        return sum
+
+    def __rsub__(self, other):
+        for v in self:
+            self[v] -= other[v]
+
+    def __neg__(self):
+        r"""
+        The additive inverse of the divisor.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+
+            sage: S = Sandpile(graphs.CycleGraph(3), 0)
+            sage: D = S.div([1,2,3])
+            sage: -D
+            {0: -1, 1: -2, 2: -3}
+        """
+        return self._sandpile.div([-self[v] for v in self._vertices])
+
+    def values(self):
+        r"""
+        Return the values of the divisor as a list, sorted in the order of the
+        vertices.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        list of integers
+
+        boolean
+
+        EXAMPLES::
+
+            sage: S = sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a') 
+            sage: D = S.div({'a':0, 'b':1, 1:2})
+            sage: D
+            {1: 2, 'a': 0, 'b': 1}
+            sage: D.values()
+            [2, 0, 1]
+            sage: S.vertices()
+            [1, 'a', 'b']
+        """
+        return [self[v] for v in self._vertices]
+
+    def support(self):
+        r"""
+        List of keys of the nonzero values of the script.
+
+        INPUT: 
+	
+	None
+
+        OUTPUT: 
+	
+	list - support of the script
+
+
+	EXAMPLES::
+        """
+        return [i for i in self.keys() if self[i] !=0]
+
+    def _set_config(self):
+        r"""
+        Set the Configuration c such that firing ``self`` is equivalent to
+        subtracting c
+        """
+        self._config = self._sandpile.config(self._div)
+
+    def config(self):
+        r"""
+        Return the Configuration c such that firing ``self`` is equivalent to
+        subtracting c
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Configuration
+
+        EXAMPLES::
+        """
+        return deepcopy(self._config)
+
+    def _set_div(self):
+        r"""
+        Set the Divisor d such that firing ``self`` is equivalent to
+        subtracting d
+        """
+        self._div = self._sandpile.div(vector(self)*self._sandpile._laplacian)
+
+    def div(self):
+        r"""
+        Get the Divisor d such that firing ``self`` is equivalent to
+        subtracting d
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+        """
+        return deepcopy(self._div)
+
+class Script(GenericScript):
+    pass
+
+class DirectedScript(GenericScript):
+    pass
 
 #######################################
 ######### Some test graphs ############
