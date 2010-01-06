@@ -289,6 +289,9 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
                    or name == '_hilbert_function'):
                 self._set_hilbert_function()
                 return deepcopy(self.__dict__[name])
+            elif name == '_compare_vertices':
+                self._set_compare_vertices()
+                return self._compare_vertices
             elif (name == '_ring' or name == '_unsaturated_ideal'):
                 self._set_ring()
                 return self.__dict__[name]
@@ -570,7 +573,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S = sandlib('generic')
 	    sage: S._set_out_degrees()
 	"""
-        self._out_degrees = dict(self.zero_div()) 
+        self._out_degrees = {}
         for v in self.vertices():
             self._out_degrees[v] = 0
             for e in self.edges_incident(v):
@@ -578,7 +581,9 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
     def out_degree(self, v=None):
         r"""
-        Return the out-degree of a vertex or a list of all out-degrees.
+        Return the out-degree of a vertex or a list of all out-degrees. This
+        overrides the method in DiGraph so that out-degree is determined by the
+        weights of out-edges.
 
 	INPUT:
 
@@ -599,7 +604,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         if not v is None:
             return self._out_degrees[v]
         else:
-            return self._out_degrees
+            return [self._out_degrees[v] for v in self.vertices()]
 
     def _set_in_degrees(self):
         """
@@ -618,13 +623,18 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S = sandlib('generic')
 	    sage: S._set_in_degrees()
         """
-        self._in_degrees = dict(self.zero_div())
+        self._in_degrees = {}
         for e in self.edges():
-            self._in_degrees[e[1]] += e[2]
+            self._out_degrees[v] = 0
+            for e in self.edges_incident(v):
+                self._out_degrees[v] += e[2]
 
     def in_degree(self, v=None):
         r"""
-        Return the in-degree of a vertex or a list of all in-degrees.
+        Return the in-degree of a vertex or a list of all in-degrees. This
+        overrides the method in DiGraph so that in-degree is determined by the
+        weights of in-edges.
+
 
 	INPUT:
 
@@ -645,7 +655,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         if not v is None:
             return self._in_degrees[v]
         else:
-            return self._in_degrees
+            return [self._in_degrees[v] for v in self.vertices()]
 
     def _set_burning_config(self):
         r"""
@@ -815,7 +825,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S.nonsink_vertices()
 	    [1, 2, 3, 4, 5]
 	"""
-        return self._nonsink_vertices
+        return copy(self._nonsink_vertices)
     
     def all_k_config(self,k):
         r"""
@@ -888,7 +898,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S._set_identity()
         """
         m = self._max_stable
-        self._identity = (m&m).dualize()&m
+        self._identity = (m&m).dual()&m
 
     def identity(self):
         r"""
@@ -998,8 +1008,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         if verbose:
             return deepcopy(self._recurrents)
         else:
-            verts = self.nonsink_vertices()
-            return [r.values() for r in self._recurrents]
+            return [list(r) for r in self._recurrents]
     
     def _set_superstables(self):
         r"""
@@ -1019,7 +1028,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S = sandlib('generic')
 	    sage: S._set_superstables()
         """
-        self._superstables = [c.dualize() for c in self._recurrents]
+        self._superstables = [c.dual() for c in self._recurrents]
 
     def superstables(self, verbose=True):
         r"""
@@ -1075,54 +1084,11 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         if verbose:
             return deepcopy(self._superstables)
         else:
-            verts = self.nonsink_vertices()
-            return [s.values() for s in self._superstables]
-
-    def _set_is_undirected(self):
-        r"""
-        Compute and store whether the underlying graph is undirected.
-
-        INPUT:
-
-        None
-
-        OUTPUT:
-
-        None
-
-        EXAMPLES:
-
-            sage: complete_sandpile(4)._set_is_undirected()
-        """
-        self._is_undirected = forall(self.edges(),
-                lambda x: (x[1],x[0],x[2]) in self.edges())[0]
-
-    def is_undirected(self):
-        r"""
-        Returns ``True`` if ``(u,v)`` is and edge if and only if ``(v,u)`` is an
-        edges, each edge with the same weight.
-
-        INPUT:
-
-        None
-
-        OUTPUT:
-
-        boolean
-
-        EXAMPLES::
-
-            sage: complete_sandpile(4).is_undirected()
-            True
-            sage: sandlib('gor').is_undirected()
-            False
-        """
-        return self._is_undirected
+            return [list(s) for s in self._superstables]
 
     def _set_min_recurrents(self):
         r"""
-        Computes the minimal recurrent elements.  If the underlying graph is
-        undirected, these are the recurrent elements of least degree.
+        Computes the minimal recurrent elements.
 
         INPUT:
 
@@ -1136,14 +1102,10 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
             sage: complete_sandpile(4)._set_min_recurrents()
         """
-        if self.is_undirected():
-            m = min([r.deg() for r in self.recurrents()])
-            rec = [r for r in self.recurrents() if r.deg()==m]
-        else:
-            rec = self.recurrents()
-            for r in self.recurrents():
-                if exists(rec, lambda x: r>x)[0]:
-                    rec.remove(r)
+        rec = self.recurrents()
+        for r in self.recurrents():
+            if exists(rec, lambda x: r>x)[0]:
+                rec.remove(r)
         self._min_recurrents = rec
 
     def min_recurrents(self):
@@ -1177,7 +1139,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
             sage: [i.deg() for i in S.recurrents()]
             [4, 2, 3, 2, 3, 2, 3, 1, 2]
         """
-        return self._min_recurrents
+        return deepcopy(self._min_recurrents)
 
     def max_superstables(self):
         r"""
@@ -1210,64 +1172,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
             sage: S.h_vector()
             [1, 3, 4, 1]
         """
-        return [r.dualize() for r in self.min_recurrents()]
-
-    def nonspecial_divisors(self):
-        r"""
-        Returns the nonspecial divisors: those divisors of degree ``g-1`` with
-        empty linear system.  The term is only defined for undirected graphs.
-        Here, ``g = |E| - |V| + 1`` is the genus of the graph.
-
-        INPUT:
-
-        OUTPUT:
-
-        EXAMPLES::
-
-            sage: S = complete_sandpile(4)
-            sage: ns = S.nonspecial_divisors()
-            sage: D = ns[0]
-            sage: D.values()
-            [-1, 1, 0, 2]
-            sage: D.deg()
-            2
-            sage: [i.effective_div() for i in ns]
-            [[], [], [], [], [], []]
-        """
-        if self._is_undirected:
-            result = []
-            for s in self.max_superstables():
-                D = dict(s)
-                D[self._sink] = -1
-                D = self.div(D)
-                result.append(D)
-            return result
-        else:
-            raise UserWarning, "The underlying graph must be undirected."
-
-    def canonical_divisor(self):
-        r"""
-        Returns the canonical divisor: the divisor ``deg(v)-2`` grains of sand
-        on each vertex.  Only for undirected graphs.
-
-        INPUT:
-
-        None
-
-        OUTPUT:
-
-        Divisor
-
-        EXAMPLES::
-
-            sage: S = complete_sandpile(4)
-            sage: S.canonical_divisor()
-            {0: 1, 1: 1, 2: 1, 3: 1}
-        """
-        if self._is_undirected:
-            return self.div([self.out_degree(v)-2 for v in self.vertices()])
-        else:
-            raise UserWarning, "Only for undirected graphs."
+        return [r.dual() for r in self._min_recurrents]
 
     def _set_elementary_divisors(self):
         r"""
@@ -1312,7 +1217,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S.elementary_divisors()
 	    [1, 1, 1, 1, 15]
         """
-        return deepcopy(self._elementary_divisors)
+        return copy(self._elementary_divisors)
 
     def _set_hilbert_function(self):
         """
@@ -1365,7 +1270,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S.h_vector()
 	    [1, 4, 6, 4]
         """
-        return deepcopy(self._h_vector)
+        return copy(self._h_vector)
 
     def hilbert_function(self):
         r"""
@@ -1385,7 +1290,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S.hilbert_function()
 	    [1, 5, 11, 15]
         """
-        return deepcopy(self._hilbert_function)
+        return copy(self._hilbert_function)
 
     def postulation(self):
         r"""
@@ -1498,6 +1403,24 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	"""
         return self.all_k_div(0)
 
+    def chi(self, verts):
+        r"""
+        The divisor ``d`` such that d[v] is the number of times ``v`` appears
+        in ``verts``.
+
+        INPUT:
+
+        ``verts`` - list of vertices
+
+        OUTPUT:
+
+        Divisor
+        """
+        d = self.zero_div()
+        for v in verts:
+            d[v] += 1
+        return d
+
     # FIX: save this in the __dict__
     def _set_betti_complexes(self):
         r"""
@@ -1520,7 +1443,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         verts = self.vertices()
         r = self.recurrents()
         for D in r:
-            D = self.divisor(D)
+            D = self.div(D)
             test = True
             while test:
                 D[self.sink()] += 1 
@@ -1577,31 +1500,9 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 ######### Algebraic Geometry ##########
 #######################################
 
-    def _compare_vertices(self, v, w):
-        r"""
-        Compare vertices based on their distance from the sink.
-
-	INPUT:
-
-	``v``, ``w`` - vertices
-
-	OUTPUT:
-
-	integer
-
-	EXAMPLES::
-
-	    sage: S = sandlib('generic')
-	    sage: S.vertices()
-	    [0, 1, 2, 3, 4, 5]
-	    sage: S.distance(3,S.sink())
-	    2
-	    sage: S.distance(1,S.sink())
-	    1
-	    sage: S._compare_vertices(1,3)
-	    -1
-        """
-        return self.distance(v, self._sink) - self.distance(w, self._sink)
+    def _set_compare_vertices(self):
+        # MUST BE DEFINED IN SUBCLASS
+        pass
 
     def _set_ring(self):
         r"""
@@ -2148,6 +2049,100 @@ class Sandpile(GenericSandpile, Graph):
         self._burning_config = self.config(bc)
         self._burning_script = self.config(bs)
 
+    def _set_min_recurrents(self):
+        r"""
+        Computes the minimal recurrent elements.  If the underlying graph is
+        undirected, these are the recurrent elements of least degree.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        None
+
+        EXAMPLES::
+
+            sage: complete_sandpile(4)._set_min_recurrents()
+        """
+        m = min([r.deg() for r in self.recurrents()])
+        self._min_recurrents = [r for r in self.recurrents() if r.deg()==m]
+
+    def _set_compare_vertices(self):
+        r"""
+        Build the vertex comparison method.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        None
+        """
+        path_lengths = self.shortest_path_lengths(self._sink)
+        def cmp_(u,v): 
+            if path_lengths[u] > path_lengths[v]:
+                return -1
+            elif path_lengths[u] < path_lengths[v]:
+                return 1
+            else:
+                return cmp(u,v)
+        self._compare_vertices = cmp_
+
+
+    def nonspecial_divisors(self):
+        r"""
+        Returns the nonspecial divisors: those divisors of degree ``g-1`` with
+        empty linear system.  Here, ``g = |E| - |V| + 1`` is the genus of the
+        graph.
+
+        INPUT:
+
+        OUTPUT:
+
+        EXAMPLES::
+
+            sage: S = complete_sandpile(4)
+            sage: ns = S.nonspecial_divisors()
+            sage: D = ns[0]
+            sage: D.values()
+            [-1, 1, 0, 2]
+            sage: D.deg()
+            2
+            sage: [i.effective_div() for i in ns]
+            [[], [], [], [], [], []]
+        """
+        result = []
+        for s in self.max_superstables():
+            D = dict(s)
+            D[self._sink] = -1
+            D = self.div(D)
+            result.append(D)
+        return result
+
+    def canonical_divisor(self):
+        r"""
+        Returns the canonical divisor: the divisor ``deg(v)-2`` grains of sand
+        on each vertex.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        Divisor
+
+        EXAMPLES::
+
+            sage: S = complete_sandpile(4)
+            sage: S.canonical_divisor()
+            {0: 1, 1: 1, 2: 1, 3: 1}
+        """
+        return self.div([self.out_degree(v)-2 for v in self.vertices()])
+
     def config(self, c):
         r"""
         Construct a Configuration on ``self``.
@@ -2255,6 +2250,28 @@ class DiSandpile(DiGraph, GenericSandpile):
         self._dict = dict_
         DiGraph.__init__(self, dict_, weighted=True)
         GenericSandpile.__init__(self, sink)
+
+    def _set_compare_vertices(self):
+        r"""
+        Build the vertex comparison method.
+
+        INPUT:
+
+        None
+
+        OUTPUT:
+
+        None
+        """
+        path_lengths = self.reverse().shortest_path_lengths(self._sink)
+        def cmp_(u,v): 
+            if path_lengths[u] > path_lengths[v]:
+                return -1
+            elif path_lengths[u] < path_lengths[v]:
+                return 1
+            else:
+                return cmp(u,v)
+        self._compare_vertices = cmp_
 
     def config(self, c):
         r"""
@@ -2390,14 +2407,14 @@ class GenericConfiguration(dict):
         """
         config = {}
         if isinstance(c, dict):
-            if set(S.nonsink_vertices()).is_subset(c.keys()):
+            if set(S._nonsink_vertices).is_subset(c.keys()):
                 for v in S.nonsink_vertices():
                     config[v] = c[v]
             else:
                 raise SyntaxError, c
         elif len(c)==S.num_verts()-1:
             c = list(reversed(c))
-            for v in S.nonsink_vertices():
+            for v in S._nonsink_vertices:
                 config[v] = c.pop()
         dict.__init__(self,config)
         self._sandpile = S
@@ -2819,7 +2836,7 @@ class GenericConfiguration(dict):
         """
         return [self[v] for v in self._vertices]
 
-    def dualize(self):
+    def dual(self):
         r"""
         Returns the difference between the maximal stable configuration and the
         configuration.
@@ -2838,9 +2855,9 @@ class GenericConfiguration(dict):
             sage: c = S.config([1,2])
             sage: S.max_stable()
             {1: 1, 2: 1}
-            sage: c.dualize()
+            sage: c.dual()
             {1: 0, 2: -1}
-            sage: S.max_stable() - c == c.dualize()
+            sage: S.max_stable() - c == c.dual()
             True
         """
         return self._sandpile.max_stable()-self
@@ -3287,8 +3304,8 @@ class GenericConfiguration(dict):
 	    sage: m = S.max_stable()
             sage: m._set_equivalent_superstable()
         """
-        r, fv = self.dualize().equivalent_recurrent(with_firing_vector=true)
-        self._equivalent_superstable = [r.dualize(), -fv]
+        r, fv = self.dual().equivalent_recurrent(with_firing_vector=true)
+        self._equivalent_superstable = [r.dual(), -fv]
 
     def equivalent_superstable(self, with_firing_vector=False):
         r"""
@@ -3350,7 +3367,7 @@ class GenericConfiguration(dict):
         elif self.__dict__.has_key('_equivalent_superstable'):
             self._is_superstable = (self._equivalent_superstable[0] == self)
         else:
-            self._is_superstable = self.dualize().is_recurrent()
+            self._is_superstable = self.dual().is_recurrent()
 
     def is_superstable(self):
         r"""
@@ -3425,7 +3442,7 @@ class GenericDivisor(dict):
     Class for divisors on a sandpile.
     """
     
-    def __init__(self, S, d):
+    def __init__(self, S, d, sink=None):
         r"""
         Create a divisor on a sandpile.
 
@@ -3447,12 +3464,25 @@ class GenericDivisor(dict):
             if set(S.vertices()).is_subset(d.keys()):
                 for v in S.vertices():
                     div[v] = d[v]
+            elif set(S._nonsink_vertices).is_subset(d.keys()):
+                for v in S._nonsink_vertices:
+                    div[v] = d[v]
+                if sink is None:
+                    sink = -sum(div.values())
+                div[S.sink()] = sink
             else:
                 raise SyntaxError, d
         elif len(d)==S.num_verts():
             d = list(reversed(d))
             for v in S.vertices():
                 div[v] = d.pop()
+        elif len(d)==S.num_verts()-1:
+            d = list(reversed(d))
+            for v in S._nonsink_vertices:
+                div[v] = d.pop()
+            if sink is None:
+                sink = -sum(div.values())
+            div[S.sink()] = sink
         else:
             raise SyntaxError, d
         dict.__init__(self,div)
@@ -3781,7 +3811,7 @@ class GenericDivisor(dict):
         """
         return [self[v] for v in self._vertices]
 
-    def dualize(self):
+    def dual(self):
         r"""
         Returns the difference between the maximal stable divisor and the
         divisor.
@@ -3797,9 +3827,9 @@ class GenericDivisor(dict):
         EXAMPLES::
             sage: S = Sandpile(graphs.CycleGraph(3), 0)
             sage: D = S.div([1,2,3])
-            sage: D.dualize()
+            sage: D.dual()
             {0: 0, 1: -1, 2: -2}
-            sage: S.max_stable_div() - D == D.dualize()
+            sage: S.max_stable_div() - D == D.dual()
             True
         """
         return self._sandpile.max_stable_div() - self
