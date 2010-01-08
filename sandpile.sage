@@ -236,7 +236,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         self._nonsink_vertices = deepcopy(self.vertices())
         del self._nonsink_vertices[self._sink_ind]
         # compute laplacians:
-        self._laplacian = self.laplacian_matrix()
+        self._laplacian = self.laplacian_matrix(indegree=False)
         temp = range(self.num_verts())
         del temp[self._sink_ind]
         self._reduced_laplacian = self._laplacian[temp,temp]
@@ -552,7 +552,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
             sage: S.max_stable_div()
             {0: -1, 1: 2, 2: 2, 3: 1, 4: 1, 5: 1}
             sage: S.out_degree()
-            {0: 0, 1: 3, 2: 3, 3: 2, 4: 2, 5: 2}
+            [0, 3, 3, 2, 2, 2]
         """
         return deepcopy(self._max_stable_div)
 
@@ -599,7 +599,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	    sage: S.out_degree(2)
 	    3
 	    sage: S.out_degree()
-	    {0: 0, 1: 3, 2: 3, 3: 2, 4: 2, 5: 2}
+	    [0, 3, 3, 2, 2, 2]
 	"""
         if not v is None:
             return self._out_degrees[v]
@@ -1437,7 +1437,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         EXAMPLES::
 
 	    sage: S = sandpile({0:{},1:{0: 1, 2: 1, 3: 4},2:{3: 5},3:{1: 1, 2: 1}},0) 
-            sage: S._set_betti_complexes()
+            sage: S._set_betti_complexes() #long time
         """
         results = []
         verts = self.vertices()
@@ -1473,13 +1473,13 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
         EXAMPLES::
 
 	    sage: S = sandpile({0:{},1:{0: 1, 2: 1, 3: 4},2:{3: 5},3:{1: 1, 2: 1}},0) 
-	    sage: p = S.betti_complexes()
+	    sage: p = S.betti_complexes() #long time
 	    sage: p[0]
 	    [{0: -8, 1: 5, 2: 4, 3: 1},
 	     Simplicial complex with vertex set (0, 1, 2, 3) and facets {(1, 2), (3,)}]
-	    sage: S.resolution()
+	    sage: S.resolution() #long time
 	    'R <-- R^5 <-- R^5 <-- R^1'
-	    sage: S.betti()
+	    sage: S.betti() #long time
 		       0     1     2     3
 	    ------------------------------
 		0:     1     -     -     -
@@ -1502,7 +1502,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
     def _set_compare_vertices(self):
         # MUST BE DEFINED IN SUBCLASS
-        pass
+        return NotImplemented
 
     def _set_ring(self):
         r"""
@@ -1585,7 +1585,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 
 	    sage: S = sandlib('generic')
             sage: S.unsaturated_ideal().gens()
-(x1^3 - x4*x3*x0, x2^3 - x5*x3*x0, x3^2 - x5*x2, x4^2 - x3*x1, x5^2 - x3*x2)
+            (x1^3 - x4*x3*x0, x2^3 - x5*x3*x0, x3^2 - x5*x2, x4^2 - x3*x1, x5^2 - x3*x2)
             sage: S.ideal().gens()
             (x2 - x0,
              x3^2 - x5*x0,
@@ -1624,7 +1624,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
              x1^3 - x4*x3*x0,
              x4*x1^2 - x5*x0^2)
              sage: S.ideal().gens()  # another way to get the generators
-            (x2 - x0,
+             (x2 - x0,
              x3^2 - x5*x0,
              x5*x3 - x0^2,
              x4^2 - x3*x1,
@@ -1681,7 +1681,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	EXAMPLES::
 
 	    sage: S = sandlib('generic')
-	    sage: S._set_resolution()
+	    sage: S._set_resolution() #long time
 	"""
         # get the resolution in singular form
         res = self.ideal()._singular_().mres(0)
@@ -1722,9 +1722,9 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	EXAMPLES::
 
             sage: S = sandlib('gor')
-            sage: S.resolution()
+            sage: S.resolution() #long time
             'R^1 <-- R^5 <-- R^5 <-- R^1'
-            sage: S.resolution(true)
+            sage: S.resolution(true) #long time
             [[ x1^2 - x3*x0 x3*x1 - x2*x0  x3^2 - x2*x1  x2*x3 - x0^2  x2^2 - x1*x0],
              [ x3  x2   0  x0   0]
             [-x1 -x3  x2   0 -x0]
@@ -1810,7 +1810,7 @@ class GenericSandpile(sage.graphs.graph.GenericGraph):
 	EXAMPLES::
 
 	    sage: S = sandlib('generic')
-	    sage: S.betti()
+	    sage: S.betti() #long time
 		       0     1     2     3     4     5
 	    ------------------------------------------
 		0:     1     1     -     -     -     -
@@ -2240,7 +2240,7 @@ class DiSandpile(DiGraph, GenericSandpile):
         dict_ = {}
         for v in g.vertices():
             edges = {}
-            for n in g.successors(v):
+            for n in g.neighbors_out(v):
                 if (type(g.edge_label(v,n)) == type(1)
                     and g.edge_label(v,n)>=0):
                     edges[n] = g.edge_label(v,n)
@@ -2407,7 +2407,7 @@ class GenericConfiguration(dict):
         """
         config = {}
         if isinstance(c, dict):
-            if set(S._nonsink_vertices).is_subset(c.keys()):
+            if set(S._nonsink_vertices).issubset(c.keys()):
                 for v in S.nonsink_vertices():
                     config[v] = c[v]
             else:
@@ -2595,7 +2595,7 @@ class GenericConfiguration(dict):
             {1: 4, 2: 4}
         """
         result = deepcopy(self)
-        for v in self:
+        for v in self._vertices:
             result[v] += other[v]
         return result
 
@@ -2620,12 +2620,12 @@ class GenericConfiguration(dict):
             {1: -2, 2: 0}
         """
         sum = deepcopy(self)
-        for v in self:
+        for v in self._vertices:
             sum[v] -= other[v]
         return sum
 
     def __rsub__(self,other):
-        for v in self:
+        for v in self._vertices:
             self[v] -= other[v]
 
     def __neg__(self):
@@ -2881,12 +2881,8 @@ class GenericConfiguration(dict):
             sage: c.fire_vertex(2)
             {1: 2, 2: 0}
         """
-        c = dict(self)
-        c[v] -= self._sandpile.out_degree(v)
-        for e in self._sandpile.outgoing_edges(v):
-            if e[1]!=self._sandpile.sink():
-                c[e[1]]+=e[2]
-        return self._sandpile.config(c)
+        script = self._sandpile.script(self._sandpile.chi([v]))
+        return self.fire_script(script)
 
     def fire_script(self, sigma):
         r"""
@@ -2955,13 +2951,8 @@ class GenericConfiguration(dict):
             sage: c.fire_unstable()
             {1: 2, 2: 1, 3: 2}
         """
-        c = dict(self)
-        for v in self.unstable():
-            c[v] -= self._sandpile.out_degree(v)
-            for e in self._sandpile.outgoing_edges(v):
-                if e[1]!=self._sandpile.sink():
-                    c[e[1]]+=e[2]
-        return self._sandpile.config(c)
+        script = self._sandpile.script(self._sandpile.chi(self.unstable()))
+        return self.fire_script(script)
 
     # FIX: make this faster by not converting to Config?
     def _set_stabilize(self):
@@ -3134,7 +3125,7 @@ class GenericConfiguration(dict):
             [3, 3, 5, 15, 15, 15, 5, 15, 15, 5, 15, 5, 15, 1, 15]
         """
         v = vector(self.values())
-        w = v*self._sandpile.reduced_laplacian().dense_matrix()^(-1)
+        w = v*self._sandpile.reduced_laplacian().dense_matrix().inverse()
         return lcm([denominator(i) for i in w])
 
     def is_stable(self):
@@ -3461,10 +3452,10 @@ class GenericDivisor(dict):
         """
         div = {}
         if isinstance(d, dict):
-            if set(S.vertices()).is_subset(d.keys()):
+            if set(S.vertices()).issubset(d.keys()):
                 for v in S.vertices():
                     div[v] = d[v]
-            elif set(S._nonsink_vertices).is_subset(d.keys()):
+            elif set(S._nonsink_vertices).issubset(d.keys()):
                 for v in S._nonsink_vertices:
                     div[v] = d[v]
                 if sink is None:
@@ -3557,11 +3548,11 @@ class GenericDivisor(dict):
                                 'inhomog': [[1, 0, 0], [0, -1, -1], [0, 0, 0]],
                                 'num_homog': 2,
                                 'num_inhomog': 3},
-             '_sandpile': Digraph on 3 vertices,
+             '_sandpile': Graph on 3 vertices,
              '_vertices': [0, 1, 2]}
             sage: D[0] += 1
             sage: D.__dict__
-            {'_sandpile': Digraph on 3 vertices, '_vertices': [0, 1, 2]}
+            {'_sandpile': Graph on 3 vertices, '_vertices': [0, 1, 2]}
 
         NOTES:
         
@@ -3666,12 +3657,12 @@ class GenericDivisor(dict):
             {0: 4, 1: 4, 2: 4}
         """
         sum = deepcopy(self)
-        for v in self:
+        for v in self._vertices:
             sum[v] += other[v]
         return sum
 
     def __radd__(self,other):
-        for v in self:
+        for v in self._vertices:
             self[v] += other[v]
 
     def __sub__(self, other):
@@ -3695,12 +3686,12 @@ class GenericDivisor(dict):
             {0: -2, 1: 0, 2: 2}
         """
         sum = deepcopy(self)
-        for v in self:
+        for v in self._vertices:
             sum[v] -= other[v]
         return sum
 
     def __rsub__(self, other):
-        for v in self:
+        for v in self._vertices:
             self[v] -= other[v]
 
     def __neg__(self):
@@ -3803,11 +3794,11 @@ class GenericDivisor(dict):
             sage: S = sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a') 
             sage: D = S.div({'a':0, 'b':1, 1:2})
             sage: D
-            {1: 2, 'a': 0, 'b': 1}
+            {'a': 0, 1: 2, 'b': 1}
             sage: D.values()
-            [2, 0, 1]
+            [0, 1, 2]
             sage: S.vertices()
-            [1, 'a', 'b']
+            ['a', 'b', 1]
         """
         return [self[v] for v in self._vertices]
 
@@ -3853,11 +3844,8 @@ class GenericDivisor(dict):
             sage: D.fire_vertex(1)
             {0: 2, 1: 0, 2: 4}
         """
-        D = dict(self)
-        D[v] -= self._sandpile.out_degree(v)
-        for e in self._sandpile.outgoing_edges(v):
-            D[e[1]]+=e[2]
-        return self._sandpile.div(D)
+        script = self._sandpile.script(self._sandpile.chi([v]))
+        return self.fire_script(script)
 
     def fire_script(self, sigma):
         r"""
@@ -3878,9 +3866,9 @@ class GenericDivisor(dict):
             sage: D = S.div([1,2,3])
             sage: D.unstable()
             [1, 2]
-            sage: D.fire_script([0,1,1])
+            sage: D.fire_script(S.script([0,1,1]))
             {0: 3, 1: 1, 2: 2}
-            sage: D.fire_script(S.script(2,0,0])) == D.fire_vertex(0).fire_vertex(0)
+            sage: D.fire_script(S.script([2,0,0])) == D.fire_vertex(0).fire_vertex(0)
             True
         """
         return self - sigma.div()
@@ -3926,12 +3914,8 @@ class GenericDivisor(dict):
             sage: D.fire_unstable()
             {0: 3, 1: 1, 2: 2}
         """
-        D = dict(self)
-        for v in self.unstable():
-            D[v] -= self._sandpile.out_degree(v)
-            for e in self._sandpile.outgoing_edges(v):
-                D[e[1]]+=e[2]
-        return self._sandpile.div(D)
+        script = self._sandpile.script(self._sandpile.chi(self.unstable()))
+        return self.fire_script(script)
 
     def _set_linear_system(self):
         r"""
@@ -4479,10 +4463,10 @@ class GenericScript(dict):
         """
         script = {}
         if isinstance(d, dict):
-            if set(S.vertices()).is_subset(d.keys()):
+            if set(S.vertices()).issubset(d.keys()):
                 for v in S.vertices():
                     script[v] = d[v]
-            elif set(S.nonsink_vertices()).is_subset(d.keys()):
+            elif set(S.nonsink_vertices()).issubset(d.keys()):
                 for v in S.nonsink_vertices():
                     script[v] = d[v]
                 script[S.sink()]=0
@@ -4534,15 +4518,6 @@ class GenericScript(dict):
         None
 
         EXAMPLES::
-
-            sage: S = sandlib('generic')
-            sage: D = S.div([1,2,3,4,5,6])
-            sage: E = deepcopy(D)
-            sage: E[0] += 10
-            sage: D
-            {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6}
-            sage: E
-            {0: 11, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6}
         """
         s = self._sandpile.script(dict(self))
         s.__dict__.update(self.__dict__)
@@ -4561,26 +4536,6 @@ class GenericScript(dict):
         None
 
         EXAMPLES::
-
-            sage: S = Sandpile(graphs.CycleGraph(3), 0)
-            sage: D = S.div([0,1,1])
-            sage: eff = D.effective_div()
-            sage: D.__dict__
-            {'_effective_div': [{0: 2, 1: 0, 2: 0}, {0: 0, 1: 1, 2: 1}],
-             '_linear_system': {'homog': [[-1, -1, -1], [1, 1, 1]],
-                                'inhomog': [[1, 0, 0], [0, -1, -1], [0, 0, 0]],
-                                'num_homog': 2,
-                                'num_inhomog': 3},
-             '_sandpile': Digraph on 3 vertices,
-             '_vertices': [0, 1, 2]}
-            sage: D[0] += 1
-            sage: D.__dict__
-            {'_sandpile': Digraph on 3 vertices, '_vertices': [0, 1, 2]}
-
-        NOTES:
-        
-        In the example, above, changing the value of ``D`` at some vertex makes
-        a call to setitem, which resets some of the stored variables for ``D``.
         """
         if key in self.keys():
             dict.__setitem__(self,key,item)
@@ -4597,20 +4552,11 @@ class GenericScript(dict):
         Set certain variables only when called.
         """
         if not self.__dict__.has_key(name):
-            if name=='confi':
+            if name=='_config':
                 self._set_config()
                 return self.__dict__[name]
             if name=='_div':
-                self._set_effective_div()
-                return self.__dict__[name]
-            if name=='_r_of_D':
-                self._set_r_of_D()
-                return self.__dict__[name]
-            if name=='_Dcomplex':
-                self._set_Dcomplex()
-                return self.__dict__[name]
-            if name=='_life':
-                self._set_life()
+                self._set_div()
                 return self.__dict__[name]
             else:
                 raise AttributeError, name
@@ -4628,20 +4574,14 @@ class GenericScript(dict):
         sum of ``self`` and ``other``
 
         EXAMPLES::
-
-            sage: S = Sandpile(graphs.CycleGraph(3), 0)
-            sage: D = S.div([1,2,3])
-            sage: E = S.div([3,2,1])
-            sage: D + E
-            {0: 4, 1: 4, 2: 4}
         """
         sum = deepcopy(self)
-        for v in self:
+        for v in self._vertices:
             sum[v] += other[v]
         return sum
 
     def __radd__(self,other):
-        for v in self:
+        for v in self._vertices:
             self[v] += other[v]
 
     def __sub__(self, other):
@@ -4657,20 +4597,14 @@ class GenericScript(dict):
         sum of ``self`` and ``other``
 
         EXAMPLES::
-
-            sage: S = Sandpile(graphs.CycleGraph(3), 0)
-            sage: D = S.div([1,2,3])
-            sage: E = S.div([3,2,1])
-            sage: D - E
-            {0: -2, 1: 0, 2: 2}
         """
         sum = deepcopy(self)
-        for v in self:
+        for v in self._vertices:
             sum[v] -= other[v]
         return sum
 
     def __rsub__(self, other):
-        for v in self:
+        for v in self._vertices:
             self[v] -= other[v]
 
     def __neg__(self):
@@ -4686,11 +4620,6 @@ class GenericScript(dict):
         Divisor
 
         EXAMPLES::
-
-            sage: S = Sandpile(graphs.CycleGraph(3), 0)
-            sage: D = S.div([1,2,3])
-            sage: -D
-            {0: -1, 1: -2, 2: -3}
         """
         return self._sandpile.div([-self[v] for v in self._vertices])
 
@@ -4710,15 +4639,6 @@ class GenericScript(dict):
         boolean
 
         EXAMPLES::
-
-            sage: S = sandpile({'a':[1,'b'], 'b':[1,'a'], 1:['a']},'a') 
-            sage: D = S.div({'a':0, 'b':1, 1:2})
-            sage: D
-            {1: 2, 'a': 0, 'b': 1}
-            sage: D.values()
-            [2, 0, 1]
-            sage: S.vertices()
-            [1, 'a', 'b']
         """
         return [self[v] for v in self._vertices]
 
@@ -4768,7 +4688,7 @@ class GenericScript(dict):
         Set the Divisor d such that firing ``self`` is equivalent to
         subtracting d
         """
-        self._div = self._sandpile.div(vector(self)*self._sandpile._laplacian)
+        self._div = self._sandpile.div(vector(self.values())*self._sandpile._laplacian)
 
     def div(self):
         r"""
@@ -5467,7 +5387,6 @@ def firing_vector(S, D, E):
       sage: D = S.div({0: 0, 1: 0, 2: 8, 3: 0})
       sage: E = S.div({0: 2, 1: 2, 2: 2, 3: 2})
       sage: v = firing_vector(S, D, E)
-      sage: 
       sage: v
       (0, 0, 2, 0)
 
